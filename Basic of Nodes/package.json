@@ -1,0 +1,19 @@
+{
+  "name": "node-tut",
+  "version": "1.0.0",
+  "description": "Welocme to thsi file",
+  "license": "ISC",
+  "author": "Sahil Rajput",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "cmd" :"nodemon CURD-in-fs.js"
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "nodemon": "^3.1.11"
+  }
+}
