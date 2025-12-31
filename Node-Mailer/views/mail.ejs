@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Email Test Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .email-form {
+            background: #ffffff;
+            padding: 20px 25px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-form h2 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .email-form label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        .email-form input,
+        .email-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .email-form textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .email-form button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .email-form button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <form class="email-form" method="POST" action="/submit">
+        <h2>Email Test</h2>
+
+        <label for="to">To</label>
+        <input type="email" id="to" name="to" placeholder="receiver@example.com" required>
+
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" placeholder="Test Email" required>
+
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+
+        <button type="submit">Send Email</button>
+    </form>
+
+</body>
+
+</html>

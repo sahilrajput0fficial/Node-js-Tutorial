@@ -3,8 +3,10 @@ import express from "express";
 import cors from 'cors';
 import studentModel from "./model/studentModel.js";
 import multer from "multer";
+import session from "express-session";
 
 const app = express()
+app.set("view engine", "ejs");
 const storage = multer.diskStorage({
     destination : function(req,file,cb){
         cb(null,'upload')
@@ -16,42 +18,58 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage})
-app.set("view engine", "ejs");
+app.use(session({
+    secret : "app"
+}))
+
 app.use(cors());
-
 app.use(express.json())
-await mongoose.connect('mongodb://localhost:27017/students').then(() => {
+const username = encodeURIComponent("rajpootsahil51_db_user")
+const password = encodeURIComponent("Sahil@123");
+const cluster = encodeURIComponent("cluster0");
+const appName = encodeURIComponent("Cluster0")
+mongoose
+  .connect(
+    `mongodb+srv://${username}:${password}@${cluster}.wftt93m.mongodb.net/students?appName=${appName}`
+  )
+  .then(() => {
     console.log("DB connected");
+  }).catch((e)=>{
+    console.log(e);
+    
 
-})
+  });
 
 app.get("/",(req,res)=>{
     res.render("form")
-
 })
 
 app.post("/upload",upload.single('file'),(req, res) => {
   console.log("upload file");
-  res.json({
-    message : "File Uploaded",
-    info :req.file
-  })
-  
+  res.setHeader("set-cookie", "name=Sahil");
+  res.send(`Logged in 
+    <a href="/profile">Profile</a>`);
 });
-
-
+app.post("/profile", upload.single("file"), (req, res) => {
+    req.session.data = req.body;
+    res.send("Done")
+});
+app.get("/user",(req,res)=>{
+    const data = req.session.data;
+    console.log(data);
+    res.render("profile",{data:data})
+})
 app.get("/api/user-list", async (req, res) => {
     const studentData = await studentModel.find();
     console.log(studentData)
-    res.send({ studentData })
+    res.send(studentData)
 
 })
 
-
 app.post("/api/save", async (req, res) => {
     try {
-        const { name, age, email, user_id } = req.body;
-        if (!name || !email || !user_id || !age) {
+        const { name, age, email, employee_id } = req.body;
+        if (!name || !email || !employee_id || !age) {
             res.status(400).json({
                 message: "Field is missing"
             })
@@ -69,12 +87,12 @@ app.post("/api/save", async (req, res) => {
             name: name,
             email: email,
             age: +age,
-            user_id: user_id
+            employee_id: employee_id
         }
         const userData = await studentModel.create(user);
         res.status(201).json({
             message: "Record Inserted",
-            insertedId: userData.insertedId
+            insertedId: userData._id ?userData._id: "NULL"
 
         })
     } catch (error) {
@@ -97,7 +115,7 @@ app.delete("/api/delete/:id", async (req, res) => {
             });
             return;
         }
-        const userData = studentModel.findByIdAndDelete(id)
+        const userData = await studentModel.findByIdAndDelete(id)
         res.status(201).json({
             message: "Record Deleted",
             deletedID: userData.name + "My name"
@@ -116,8 +134,8 @@ app.put("/api/update/:id", async (req, res) => {
         const id = req.params.id;
         console.log(id);
         
-        const { name, age, email, user_id } = req.body;
-        if (!name || !email || !user_id || !age) {
+        const { name, age, email, employee_id } = req.body;
+        if (!name || !email || !employee_id || !age) {
             res.status(400).json({
                 message: "Field is missing",
             });
@@ -134,8 +152,8 @@ app.put("/api/update/:id", async (req, res) => {
           name,
           age,
           email,
-          user_id,
-        });
+          employee_id,
+        },{new:true});
         res.status(201).json({
             message: "Record Updated",
             updatedId: userData._id

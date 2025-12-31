@@ -1,0 +1,12 @@
+step 1 : 
+install three packages :
+1.typescript 
+2. ts-node (used to run ts files)
+3. @types/node (dev dependency) [ --save-dev]
+
+
+step 2 : 
+learn ts 
+
+step 3:
+Implement 
