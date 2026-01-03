@@ -1,6 +1,12 @@
 import dotenv from "dotenv"
 import { app } from "./app.js"
+import { connect } from "mongoose"
+import connectDb from "./config/db.js"
 dotenv.config()
+
+
+connectDb()
+
 // import path from "path"
 // import fs from "fs"
 
