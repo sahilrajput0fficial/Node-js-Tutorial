@@ -1,5 +1,5 @@
 import React from 'react'
-import { useEffect } from 'react'
+import { useEffect , useState } from 'react'
 import { getCategory } from '@/assets/api/category.api'
 const CategoryTab = () => {
   const [categoryData, setCategoryData] = useState([])
