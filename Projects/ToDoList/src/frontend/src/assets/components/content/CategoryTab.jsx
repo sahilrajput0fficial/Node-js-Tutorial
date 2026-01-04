@@ -1,20 +1,13 @@
 import React from 'react'
-import { useEffect , useState } from 'react'
-import { getCategory } from '@/assets/api/category.api'
-const CategoryTab = () => {
-  const [categoryData, setCategoryData] = useState([])
-  useEffect(() => {
-    const data = getCategory();
-    console.log(data);
-    setCategoryData(data);
-  }, [])
-  
+const CategoryTab = ({_id,img , title}) => {
   return (
     <>
-    <div className='flex flex-col justify-center items-center'>
-    <img src="/earbuds.webp" alt="earbuds" />
-    <p>True Wireless Earbuds</p>
+    <a href="/">
+    <div key={_id} className='flex flex-col justify-center items-center text-center gap-2'>
+      <img src={img} alt={title} className='size-20'/>
+      <p className='font-semibold'>{title}</p>
     </div>
+    </a>
 
     </>
   )
