@@ -9,7 +9,6 @@ import About from './assets/pages/About'
 const App = () => {
   return (
     <>
-    <TopBar/>
     <Navbar/>
     <Routes>
         <Route path="/" element={<Home/>}/>

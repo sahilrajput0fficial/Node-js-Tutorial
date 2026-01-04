@@ -1,11 +1,15 @@
 import React from 'react'
 import ShopByCategory from '../components/layouts/ShopByCategory'
+import SaleIsLive from '../components/layouts/SaleIsLive'
 
 const Home = () => {
   return (
     <>
-    <div>Home</div>
-    <ShopByCategory/>
+  <main className="">
+    <ShopByCategory />
+    <SaleIsLive/>
+    {/* other sections */}
+  </main>
     </>
   )
 }

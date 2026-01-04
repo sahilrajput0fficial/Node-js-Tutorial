@@ -20,7 +20,7 @@ const ShopByCategory = () => {
   
   return (
     <>
-    <div className='w-full px-12 '>
+    <div className='w-full px-12 my-8'>
         <div className='flex justify-between items-center '>
             <div>
             <HomeHeadings H1="Shop" H2="By Categories"/>
