@@ -2,6 +2,7 @@ import dotenv from "dotenv"
 import { app } from "./app.js"
 import { connect } from "mongoose"
 import connectDb from "./config/db.js"
+import "./models/color.models.js"
 dotenv.config()
 
 

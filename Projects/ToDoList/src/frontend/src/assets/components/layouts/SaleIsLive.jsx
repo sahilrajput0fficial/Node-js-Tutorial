@@ -1,55 +1,77 @@
-import React, { useEffect, useState } from "react";
 import DisplayProdCard from "../content/DisplayProdCard";
-import ProductList from "../content/ProductList";
 import HomeHeadings from "../content/HomeHeadings";
 import { ViewAll } from "@/components/ui/view-all";
+import { useQuery } from "@tanstack/react-query";
 import { getSaleLiveData } from "@/assets/api/products.api";
-import Logo from "../content/Logo";
+import { useState } from "react";
+
 const SaleIsLive = () => {
-  const [productList, setproductList] = useState([]);
-  const [filter, setfilter] = useState(["New Launches"])
-  useEffect(() => {
-    const fetchProd = async () => {
-      const { data } = await getSaleLiveData();
-      setproductList(data);
-      console.log(data);
-    };
-    fetchProd();
-  }, []);
+  const [filter, setFilter] = useState("New Launches");
+
+  const {
+    data: productList = [],
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["products"],
+    queryFn: getSaleLiveData, // MUST return data
+  });
+  console.log(productList);
+  
+
+  if (isLoading) return <p>Loading products...</p>;
+  if (isError) return <p>Failed to load products</p>;
+
+  const newLaunchData = productList.data.filter(
+    (p) => p.metatitle === "🎉 New Launch"
+  );
+
+  const personalisationData = productList.data.filter(
+    (p) => p.metatitle === "🎉 Engraving Available"
+  );
 
   return (
-    <>
-      <div className="w-full px-12 my-8">
-        <div className="flex justify-between items-center ">
-          <div>
-            <HomeHeadings H1="Top Picks" H2="For You" />
-          </div>
-          <ViewAll />
+    <div className="w-full px-12 my-8">
+      <div className="flex justify-between items-center">
+        <div>
+        <HomeHeadings H1="Top Picks" H2="For You" />
         </div>
-        <div className="flex gap-6">
-          <span className={`p-2 cursor-pointer transition-all ease-in-out ${ filter === "New Launches" ? "rounded-full bg-gray-100": ""}`} onClick={()=>{
-
-            setfilter("New Launches")
-            console.log("New Launches");
-            
-          }}>New Launches</span>
-          <span onClick={()=>{
-            setfilter("Personalisation")
-            console.log("Personalisation");
-          }}>Personalisation</span>
-        </div>
-        <div className="grid grid-cols-6 md:grid-cols-6 sm:grid-cols-3 gap-1 p-4">
-        {filter === "New Launches" ? (
-        productList.map((data, idx) => (
-          <DisplayProdCard key={idx} data={data} />
-        ))
-        ) : filter === "Personalisation" ? (
-        <Logo />
-        ) : null}
-
-        </div>
+        <ViewAll />
       </div>
-    </>
+
+      <div className="flex gap-4 mt-4">
+        <span
+          className={`p-2 cursor-pointer ${
+            filter === "New Launches"
+              ? "rounded-full bg-[#E7EBEC] font-medium"
+              : "text-[#9EA0A2]"
+          }`}
+          onClick={() => setFilter("New Launches")}
+        >
+          New Launches
+        </span>
+
+        <span
+          className={`p-2 cursor-pointer ${
+            filter === "Personalisation"
+              ? "rounded-full bg-[#E7EBEC] font-medium"
+              : "text-[#9EA0A2]"
+          }`}
+          onClick={() => setFilter("Personalisation")}
+        >
+          Personalisation
+        </span>
+      </div>
+
+      <div className="grid grid-cols-6 gap-1 p-4">
+        {(filter === "New Launches"
+          ? newLaunchData
+          : personalisationData
+        ).map((item) => (
+          <DisplayProdCard key={item.id} data={item} />
+        ))}
+      </div>
+    </div>
   );
 };
 

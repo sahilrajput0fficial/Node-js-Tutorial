@@ -12,7 +12,7 @@ export const getProductDataBySlug = async(req,res)=>{
             return;
 
         }
-        const data = await ProductModel.find({"slug":slug})
+        const data = await ProductModel.findOne({"slug":slug}).populate("category").populate("variants.color")
         console.log(data);
         res.status(200).json(data);
 

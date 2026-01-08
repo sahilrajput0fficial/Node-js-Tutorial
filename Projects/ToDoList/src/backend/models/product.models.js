@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
+import { CategorySchema } from "./category.models.js";
 export const variantsSchema = new mongoose.Schema({
-    color : String , 
-    colorCode : String , 
-    images : [String],
-    price : Number , 
-    stock : Number , 
-    sku : String
-
-})
+  color: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "colors",
+    required: true,
+  },
+  images: [String],
+  price: Number,
+  stock: Number,
+  sku: String,
+});
 export const ProductSchema = new mongoose.Schema({
   slug: {
     type: String,
@@ -17,6 +20,11 @@ export const ProductSchema = new mongoose.Schema({
   },
   name: String,
   description: String,
+  category : { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "categories", 
+    required: true 
+  },
   metatitle: String ,
   rating : Number , 
   prop : [String],
