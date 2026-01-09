@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
+
 const pincodeSchema = new mongoose.Schema({
   pincode: {
-    type: Number,
+    type: String,
     required: true,
     unique: true,
     index: true,
@@ -25,10 +26,11 @@ const pincodeSchema = new mongoose.Schema({
     default: 2,
   },
 });
+
 const warehouseSchema = new mongoose.Schema({
   name: String,
-  pincode: Number,
-  region: String,
+  pincodes: [String],
+  regions: [String],
   priority: {
     type: Number,
     default: 1
@@ -39,5 +41,24 @@ const warehouseSchema = new mongoose.Schema({
   }
 });
 
+
+const inventorySchema = new mongoose.Schema({
+  productId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "products",
+  },
+  variantId : mongoose.Schema.Types.ObjectId,
+  warehouseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "warehouse",
+  },
+  stock: Number,
+});
+
+
+
 export const warehouseModel = mongoose.model("warehouse", warehouseSchema);
 export const pincodeModel = mongoose.model("pincode", pincodeSchema);
+export const inventoryModel =  mongoose.model("Inventory", inventorySchema);
+
+

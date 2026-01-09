@@ -17,8 +17,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { QueryClient } from "@tanstack/react-query";
 import { Spinner } from "@radix-ui/themes";
+import { getAvail } from "../api/delivery.api";
 const Products = () => {
-    const thumbnails = ["https://res.cloudinary.com/ddff3o1bg/image/upload/v1767784591/Wireless-Speaker_small_kprvh2.webp", "/boat-speaker-thumb1.png", "/boat-speaker-thumb1.png", "/boat-speaker-thumb1.png", "/boat-speaker-thumb1.png"];
+    
 
 
   const params = useParams();
@@ -42,10 +43,12 @@ const Products = () => {
         return product.variants[variantIdx];
     }, [product, variantIdx, isLoading]);
     const colorOptions =  (product.variants ? product.variants.map(item => item.color) : []);
+    const thumbnails = {}
+    product?.variants?.forEach((item,key)=>{
+      let imageArray = item.images;
+      thumbnails[key] = imageArray
 
-    //console.log(colorOptions);
-    console.log(colorOptions);
-    
+    })
     
 
 const activeOffers = [
@@ -112,7 +115,7 @@ const activeOffers = [
             <div className="sticky flex gap-4">
               {/* Thumbnails */}
               <div className="flex flex-col gap-3">
-                {thumbnails.map((thumb, index) => (
+                {thumbnails[variantIdx].map((thumb, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
@@ -132,11 +135,11 @@ const activeOffers = [
               </div>
 
               {/* Main Image */}
-              <div className="flex-1 bg-muted rounded-2xl p-8 flex items-center justify-center relative">
+              <div className="flex-1 bg-muted rounded-2xl  flex  justify-center relative">
                 <img
-                  src={thumbnails[selectedImage] || speakerMain}
+                  src={thumbnails[variantIdx][selectedImage] || ''}
                   alt="boAt Stone 350 Pro"
-                  className="max-w-full max-h-125 object-contain"
+                  className="max-w-full max-h-150 object-cover rounded-2xl"
                 />
                 <span className="absolute bottom-4 left-4 text-xs text-muted-foreground flex items-center gap-1">
                   <span className="w-4 h-4 rounded-full bg-muted-foreground/20 flex items-center justify-center text-[10px]">
@@ -233,8 +236,9 @@ const activeOffers = [
                       onClick={() =>{
                         setSelectedColor(index);
                         setVariantIdx(index);
-                    }}
-                      className={`w-10 h-10 rounded-full bg-[${option.code}]  border-2 transition-all ${
+                    }} 
+                        style={{ backgroundColor: option.code }}
+                      className={`w-10 h-10 rounded-full border-2 transition-all ${
                         selectedColor === index
                           ? "border-primary ring-2 ring-primary/30"
                           : "border-border hover:border-muted-foreground"
@@ -262,7 +266,9 @@ const activeOffers = [
                     }
                     className="flex-1"
                   />
-                  <Button variant="outline" className=" bg-black text-white cursor-pointer">Change</Button>
+                  <Button variant="outline" onClick={()=>{
+                    getAvail(product?._id,variantData?._id,pincode)
+                  }}className=" bg-black text-white cursor-pointer">Change</Button>
                 </div>
                 <p className="text-sm mt-3 flex items-center gap-2 font-semibold text-success">
                  <span className="text-[#00C68C] ">Free delivery</span>| By Thursday, 9 Jan
