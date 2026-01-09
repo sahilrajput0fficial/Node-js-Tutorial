@@ -1,6 +1,16 @@
-import React, { useEffect, useState ,useMemo} from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Star, Heart, Share2, MapPin, Truck, Gift, Tag, ChevronRight, Check } from "lucide-react";
+import {
+  Star,
+  Heart,
+  Share2,
+  MapPin,
+  Truck,
+  Gift,
+  Tag,
+  ChevronRight,
+  Check,
+} from "lucide-react";
 import { getProductData } from "../api/products.api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,94 +29,137 @@ import { QueryClient } from "@tanstack/react-query";
 import { Spinner } from "@radix-ui/themes";
 import { getAvail } from "../api/delivery.api";
 const Products = () => {
-    
-
-
   const params = useParams();
   //const [data, setdata] = useState({});
+  const [availability, setAvailability] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
   const [pincode, setPincode] = useState("");
   const [variantIdx, setVariantIdx] = useState(0);
 
+  const {
+    data: product = {},
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["prod-detail", params.slug],
+    queryFn: async() => {
+      return await getProductData(params.slug);
+    },
+  });
 
-  const {data : product={}, isLoading , isError } = useQuery({
-    queryKey: ["prod-detail",params.slug],
-    queryFn: async()=>{
-        return await getProductData(params.slug)
-    }, 
-  })
-  console.log(product);
-  
+
+  const handleChange = async () => {
+    if (!pincode) return alert("Enter pincode");
+    if (!variantData) return;
+
+    const data = await getAvail(product._id, variantData._id, pincode);
+
+    const etaDate = new Date(data.eta);
+
+    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+    const formattedETA = {
+      day: days[etaDate.getDay()],
+      date: etaDate.getDate().toString(),
+      month: etaDate.toLocaleString("en-IN", { month: "short" }),
+      year: etaDate.getFullYear(),
+      time: etaDate.toLocaleString("en-IN", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }),
+    };
+
+    console.log( {...data,
+      formattedETA})
+
+    setAvailability({
+      ...data,
+      formattedETA,
+    });
+  };
+
+
   const variantData = useMemo(() => {
     if (isLoading || !product?.variants?.length) return null;
-        return product.variants[variantIdx];
-    }, [product, variantIdx, isLoading]);
-    const colorOptions =  (product.variants ? product.variants.map(item => item.color) : []);
-    const thumbnails = {}
-    product?.variants?.forEach((item,key)=>{
-      let imageArray = item.images;
-      thumbnails[key] = imageArray
+    return product.variants[variantIdx];
+  }, [product, variantIdx, isLoading]);
+  const colorOptions = product.variants
+    ? product.variants.map((item) => item.color)
+    : [];
+  const thumbnails = {};
+  product?.variants?.forEach((item, key) => {
+    let imageArray = item.images;
+    thumbnails[key] = imageArray;
+  });
 
-    })
-    
+  const activeOffers = [
+    {
+      tag: "MOST POPULAR",
+      label: "Buy 2 or more",
+      discount: "Get RS 60 OFF",
+      code: "BOAT2",
+    },
+    {
+      tag: "BEST VALUE",
+      label: "Buy 5 or more",
+      discount: "Get RS 200 OFF",
+      code: "BOAT5",
+    },
+    {
+      tag: "MOST SAVINGS",
+      label: "Buy 10 or more",
+      discount: "Get RS 500 OFF",
+      code: "BOAT10",
+    },
+  ];
 
-const activeOffers = [
-  { tag: "MOST POPULAR", label: "Buy 2 or more", discount: "Get RS 60 OFF", code: "BOAT2" },
-  { tag: "BEST VALUE", label: "Buy 5 or more", discount: "Get RS 200 OFF", code: "BOAT5" },
-  { tag: "MOST SAVINGS", label: "Buy 10 or more", discount: "Get RS 500 OFF", code: "BOAT10" },
-];
-
-  
-  
-  
-
-  
-  if(isLoading) return (<Spinner/>);
+  if (isLoading) return <Spinner />;
   if (isError) return <p>Failed to load products</p>;
 
   return (
     <>
       <div className="min-h-screen mt-10 bg-background">
-        
-    
         {/* Header */}
 
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-3 text-sm">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/">Home</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
 
-            <BreadcrumbSeparator />
+              <BreadcrumbSeparator />
 
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/category">All Collections</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-                <Link to={`/category/${product.category.title}`}>{product.category.title || "Hello"}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to="/category">All Collections</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
 
-            <BreadcrumbSeparator />
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link to={`/category/${product.category.title}`}>
+                    {product.category.title || "Hello"}
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
 
-            <BreadcrumbItem>
-              <BreadcrumbPage>
-                <b>{product.name}</b>
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-    </div>
+              <BreadcrumbSeparator />
+
+              <BreadcrumbItem>
+                <BreadcrumbPage>
+                  <b>{product.name}</b>
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
@@ -137,7 +190,7 @@ const activeOffers = [
               {/* Main Image */}
               <div className="flex-1 bg-muted rounded-2xl  flex  justify-center relative">
                 <img
-                  src={thumbnails[variantIdx][selectedImage] || ''}
+                  src={thumbnails[variantIdx][selectedImage] || ""}
                   alt="boAt Stone 350 Pro"
                   className="max-w-full max-h-150 object-cover rounded-2xl"
                 />
@@ -158,29 +211,33 @@ const activeOffers = [
                   #1 SELLING
                 </span> */}
                 <div className="flex gap-2 items-center ">
-                    <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1">
                     <div className="flex">
-                        <Star
-                            className="w-4 h-4 fill-yellow-400 text-yellow-400"
-                        />
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     </div>
                     <span className="text-sm text-muted-foreground">
-                       {product.rating}
+                      {product.rating}
                     </span>
                     <span className="text-sm flex items-center gap-x-0.5 text-muted-foreground">
-                        (9<img src="https://cdn.shopify.com/s/files/1/0057/8938/4802/files/Mask_group-10.png?v=1677571152" 
-                        style={{"width":"12px" ,"height":"12px","verticalAlign":"middle"}}
-                        alt="verified reviews"></img>)
+                      (9
+                      <img
+                        src="https://cdn.shopify.com/s/files/1/0057/8938/4802/files/Mask_group-10.png?v=1677571152"
+                        style={{
+                          width: "12px",
+                          height: "12px",
+                          verticalAlign: "middle",
+                        }}
+                        alt="verified reviews"
+                      ></img>
+                      )
                     </span>
-                    </div>
-                    <div className="border border-[#D73334] text-[#D73334] bg-[#FCF3F3] px-2 py-1 rounded-full">
-                        <p className="text-boat-teal text-sm font-medium mb-1">
-                            Earn upto 94 boAt reward points on this product!
-                        </p>
-
-                    </div>
+                  </div>
+                  <div className="border border-[#D73334] text-[#D73334] bg-[#FCF3F3] px-2 py-1 rounded-full">
+                    <p className="text-boat-teal text-sm font-medium mb-1">
+                      Earn upto 94 boAt reward points on this product!
+                    </p>
+                  </div>
                 </div>
-                
               </div>
 
               {/* Title */}
@@ -196,7 +253,7 @@ const activeOffers = [
               {/* Price */}
               <div className="flex items-center gap-1">
                 <span className="text-3xl font-bold text-foreground">
-                  ₹{discount(variantData.price,variantData.discount)}
+                  ₹{discount(variantData.price, variantData.discount)}
                 </span>
                 <span className="text-md text-gray-500 text-muted-foreground line-through">
                   ₹{variantData.price}
@@ -209,7 +266,9 @@ const activeOffers = [
               {/* EMI Options */}
               <div className="bg-[#f0f3f8] rounded-lg p-2 text-sm w-4/5">
                 <span className="font-medium">Pay </span>
-                <span className="bg-[#00C68C] text-white px-1 py-0.5 rounded-md font-semibold">₹633</span>
+                <span className="bg-[#00C68C] text-white px-1 py-0.5 rounded-md font-semibold">
+                  ₹633
+                </span>
                 <span className="text-muted-foreground">
                   {" "}
                   now. Rest in 0% Interest EMIs via{" "}
@@ -233,11 +292,11 @@ const activeOffers = [
                   {colorOptions.map((option, index) => (
                     <button
                       key={option.name}
-                      onClick={() =>{
+                      onClick={() => {
                         setSelectedColor(index);
                         setVariantIdx(index);
-                    }} 
-                        style={{ backgroundColor: option.code }}
+                      }}
+                      style={{ backgroundColor: option.code }}
                       className={`w-10 h-10 rounded-full border-2 transition-all ${
                         selectedColor === index
                           ? "border-primary ring-2 ring-primary/30"
@@ -252,29 +311,62 @@ const activeOffers = [
               {/* Check Delivery */}
               <div className="flex justify-between items-center bg-[#F6F6F8] rounded-lg p-4 w-7/9">
                 <div>
-                <p className="text-sm font-medium mb-3 flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Check Delivery
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    placeholder="Enter Pincode"
-                    value={pincode}
-                    onChange={(e) => setPincode(e.target.value)
-                        
-                    }
-                    className="flex-1"
-                  />
-                  <Button variant="outline" onClick={()=>{
-                    getAvail(product?._id,variantData?._id,pincode)
-                  }}className=" bg-black text-white cursor-pointer">Change</Button>
+                  <p className="text-sm font-medium mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Check Delivery
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter Pincode"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleChange();
+                      }}
+                      className=" bg-black text-white cursor-pointer"
+                    >
+                      Change
+                    </Button>
+                  </div>
+                  <div>
+                    {availability ? (
+                      availability.deliverable ?(
+                        <>
+                        <p className="text-sm mt-3 flex items-center gap-2 font-semibold text-success">
+                      {availability?.shipping==0 || availability?.shipping=='FREE'? (
+                      <span className="text-[#00C68C] ">Free Delivery</span>
+                      ) : 
+                      <span className="text-black ">${availability?.shipping}</span>
+
+                      }
+                      | By {" "}
+                      {availability?.formattedETA?.day}, {availability?.formattedETA?.date} {availability?.formattedETA?.month}
+                    </p>
+                        </>
+
+                      ):(
+                        <>
+                        <p className="text-sm mt-3 flex items-center gap-2 font-semibold text-red-900">Sorry ! Not Deliverable At your address right now</p>
+                        </>
+
+                      )
+                      
+                    ):(
+                      <div></div>
+                    )}
+                  </div>
+                  <div className={(!availability ? (availability?.deliverable ? 'bg-red-400':'bg-green-300'):'hidden')}>
+                    
                 </div>
-                <p className="text-sm mt-3 flex items-center gap-2 font-semibold text-success">
-                 <span className="text-[#00C68C] ">Free delivery</span>| By Thursday, 9 Jan
-                </p>
                 </div>
-                <div><Truck className="w-16 h-16" /></div>
+                <div>
+                  <Truck className="w-16 h-16" />
+                </div>
               </div>
 
               {/* Rewards */}
