@@ -5,7 +5,6 @@ import Home from './assets/pages/Home'
 import Category from './assets/pages/Category'
 import Products from './assets/pages/Products'
 import About from './assets/pages/About'
-import AddProd from './web-seller/src/pages/AddProd'
 
 const App = () => {
   return (

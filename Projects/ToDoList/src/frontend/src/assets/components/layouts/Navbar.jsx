@@ -4,6 +4,10 @@ import Search from "../content/Search";
 import { ShoppingBag, ShoppingBagIcon, User } from "lucide-react";
 import { memo } from "react";
 import TopBar from "../content/TopBar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import UserTooltip from "../content/UserToolTip";
+import CartSheet from "../content/CartSheet";
+import LoginModal from "@/assets/pages/Login";
 const Navbar = memo(function () {
 
 
@@ -24,9 +28,11 @@ const Navbar = memo(function () {
         </div>
         <div className="flex flex-row items-center gap-4">
             <Search />
-
-            
-            <User size="40" />
+        <div>
+          <LoginModal trigger={<UserTooltip />}/>
+          
+        </div>
+            <CartSheet />
             <ShoppingBag size="40"/>
         </div>
       </nav>
