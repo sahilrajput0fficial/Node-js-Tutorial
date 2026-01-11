@@ -2,3 +2,6 @@
 @import "@radix-ui/themes/styles.css";
 
 
+:root{
+    --border: 220 13% 91%;
+}

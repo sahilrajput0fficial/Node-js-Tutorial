@@ -25,7 +25,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { QueryClient } from "@tanstack/react-query";
 import { Spinner } from "@radix-ui/themes";
 import { getAvail } from "../api/delivery.api";
 const Products = () => {
@@ -309,7 +308,7 @@ const Products = () => {
               </div>
 
               {/* Check Delivery */}
-              <div className="flex justify-between items-center bg-[#F6F6F8] rounded-lg p-4 w-7/9">
+              <div className="flex justify-between items-center bg-[#F6F6F8] rounded-lg p-4 w-9/12">
                 <div>
                   <p className="text-sm font-medium mb-3 flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
@@ -365,34 +364,38 @@ const Products = () => {
                 </div>
                 </div>
                 <div>
-                  <Truck className="w-16 h-16" />
+                  <img className="w-16 pr-2"src="https://cdn.shopify.com/s/files/1/0057/8938/4802/files/Layer_1_2_da487286-f7ce-4762-87ca-5e9ebebbc3b5.png?v=1730964519" alt="delivery"></img>
                 </div>
               </div>
 
               {/* Rewards */}
-              <div className="border border-border rounded-lg p-4">
-                <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-boat-teal" />
+              <p className="text-sm font-semibold mb-2 flex items-center gap-2">
+                  <Gift className="w-4 h-4  " />
                   Rewards and Payment Offers
-                </p>
-                <div className="flex items-center justify-between bg-muted rounded-lg p-3">
-                  <span className="text-sm">
+              </p>
+              <div className="rounded-lg w-10/12 p-4">
+                
+                <div className="flex items-center justify-between border-b border-b-gray-400  bg-[#F6F6F8] rounded-lg p-3">
+                  <span className="text-sm font-semibold">
                     Redeem upto 10% off additionally with boAt rewards
                   </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <img className="max-h-10" src="https://cdn.shopify.com/s/files/1/0057/8938/4802/files/boAt_Rewards_logo.png?v=1694079279" loading="lazy" alt="boAt Rewards"  width="40" height="40"></img>
+                  </div>
+                  
                 </div>
               </div>
 
               {/* Active Offers */}
               <div>
                 <p className="text-sm font-medium mb-3">Active Offers</p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3 ">
                   {activeOffers.map((offer) => (
                     <div
                       key={offer.code}
-                      className="border border-border rounded-lg p-3 text-center hover:border-primary transition-colors cursor-pointer"
+                      className="bg-activeBg border border-gray-400 rounded-lg p-3 text-center hover:border-primary transition-colors cursor-pointer"
                     >
-                      <span className="text-[10px] px-2 py-0.5 bg-boat-teal text-primary-foreground rounded-full font-medium">
+                      <span className="absolute top-0 text-[10px] px-2 py-0.5 bg-boat-teal text-primary-foreground rounded-full font-medium">
                         {offer.tag}
                       </span>
                       <p className="text-sm font-medium mt-2">{offer.label}</p>
