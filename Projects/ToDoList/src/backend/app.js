@@ -1,14 +1,20 @@
 import express from "express"
 import cors from "cors"
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
 import categoryRoutes from "./routes/category.routes.js"
 import productRoutes from "./routes/products.routes.js"
+import authRoutes from "./routes/auth.routes.js"
 import { createColor, getColors } from "./controllers/color.controller.js"
 import { addInventory, addPincode, addWarehouse, checkAvailability } from "./controllers/delivery.controller.js"
+import { authenticateJWT } from "./middlewares/authenticateJWT.js"
 export const app = express()
+
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
+app.use("/api/auth",authRoutes)
 app.use("/api/category",categoryRoutes)
 
 app.use("/api/products",productRoutes);
@@ -22,7 +28,10 @@ app.get("/api/colors/cr", createColor);
 app.get("/api/pincode/cr",addPincode)
 app.get("/api/wh/cr", addWarehouse);
 app.get("/api/in/cr", addInventory);
-
+app.get("/protected",authenticateJWT,(req,res)=>{
+    res.json({message:"Protected Route Accessed"})
+    return;
+})
 
 
 

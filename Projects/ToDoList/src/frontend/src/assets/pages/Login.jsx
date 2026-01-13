@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useForm } from "react-hook-form"
+import { signUp } from "../api/auth.api"
+import { useQuery } from "@tanstack/react-query"
 
 export default function LoginModal() {
   const [mode, setMode] = useState("login")
@@ -29,8 +31,13 @@ export default function LoginModal() {
     reset()
   }, [mode, reset])
 
-  const onSubmit = (data) => {
-    console.log(mode, data)
+  const onSubmit = async(data) => {
+    if(mode==="signup"){
+      const resp = await signUp(data);
+      console.log(resp);
+      
+    }
+    
   }
 
   return (
