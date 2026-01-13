@@ -23,7 +23,7 @@ export default function UserTooltip() {
         </TooltipContent>
 
         {!isAuthenticated && (
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md bg-white ">
             <LoginModal />
           </DialogContent>
         )}
