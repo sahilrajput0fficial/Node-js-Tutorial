@@ -3,13 +3,15 @@ import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
 import { User } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import LoginModal from "@/assets/pages/Login";
+import { useState } from "react";
 
 export default function UserTooltip() {
   const { isAuthenticated } = useAuth();
+  const [open,setOpen] = useState(false);
 
   return (
     <Tooltip>
-      <Dialog>
+      <Dialog  open={open} onOpenChange={setOpen}>
         <TooltipTrigger asChild>
           <DialogTrigger asChild>
             <button className="p-2 rounded-full hover:bg-gray-200">
@@ -24,7 +26,7 @@ export default function UserTooltip() {
 
         {!isAuthenticated && (
           <DialogContent className="sm:max-w-md bg-white ">
-            <LoginModal />
+            <LoginModal onSuccess={() => setOpen(false)}/>
           </DialogContent>
         )}
       </Dialog>

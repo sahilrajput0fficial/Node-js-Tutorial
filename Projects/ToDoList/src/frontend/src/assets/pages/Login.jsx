@@ -11,11 +11,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useForm } from "react-hook-form"
-import { signUp } from "../api/auth.api"
+import { signIn, signUp } from "../api/auth.api"
 import { useQuery } from "@tanstack/react-query"
+import { useAuth } from "@/context/AuthContext"
 
-export default function LoginModal() {
+export default function LoginModal({onSuccess}) {
   const [mode, setMode] = useState("login")
+  const {login } = useAuth();
+  
 
   const {
     register,
@@ -34,8 +37,15 @@ export default function LoginModal() {
   const onSubmit = async(data) => {
     if(mode==="signup"){
       const resp = await signUp(data);
-      console.log(resp);
+      onSuccess();
+      console.log("Signup successful:", resp);
       
+    }
+    else{
+      const resp = await signIn(data);
+      console.log("Token received:", resp.data.token);
+      login(resp.data.token)
+      onSuccess();
     }
     
   }
@@ -52,7 +62,7 @@ export default function LoginModal() {
       </DialogHeader>
 
 
-      {mode==="login "?(
+      {mode==="login"?(
         // Login Form
         <form method="POST" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 py-4">
@@ -114,7 +124,7 @@ export default function LoginModal() {
               <Label>First Name</Label>
               <Input
                 placeholder="John"
-                {...register("fname", { required: "First name is required" })}
+                {...register("firstName", { required: "First name is required" })}
               />
               {errors.fname && (
                 <p className="text-sm text-red-500">{errors.fname.message}</p>
@@ -125,7 +135,7 @@ export default function LoginModal() {
               <Label>Last Name</Label>
               <Input
                 placeholder="Doe"
-                {...register("lname", { required: "Last name is required" })}
+                {...register("lastName", { required: "Last name is required" })}
               />
               {errors.lname && (
                 <p className="text-sm text-red-500">{errors.lname.message}</p>

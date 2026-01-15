@@ -1,6 +1,6 @@
 import { userModel } from "../models/auth.models.js";
 import bcrypt from "bcrypt";
-
+import jwt from "jsonwebtoken";
 export const signupController = async (req, res) => {
   try {
     const data = req.body;
@@ -80,4 +80,28 @@ export const loginController = async (req, res) => {
             error:err.message
         })
     }
+}
+
+export const getProfileController = async(req,res)=>{
+    try{
+        const userId = req.user.userId;
+        const user = await userModel.findById(userId);
+        console.log(user);
+        
+        res.status(200).json({
+            message:"User Profile fetched successfully",
+            user:user
+        })
+
+    }catch(err){
+        res.status(500).json({
+            message:"Internal Server Error",
+            error:err.message
+        })
+    }
+}
+
+export const getStaffController = async(req,res)=>{
+    console.log("Inside stAFF ADMIN");
+    
 }
