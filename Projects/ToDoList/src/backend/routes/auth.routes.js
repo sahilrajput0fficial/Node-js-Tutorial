@@ -1,6 +1,6 @@
 import express from "express"
 import bcrypt from "bcrypt"
-import { getProfileController, signupController , getStaffController} from "../controllers/auth.controller.js";
+import { getProfileController, signupController , getStaffController , refreshTokenController} from "../controllers/auth.controller.js";
 const router = express.Router()
 import { loginController } from "../controllers/auth.controller.js";
 import { authenticateJWT } from "../middlewares/authenticateJWT.js";
@@ -9,4 +9,5 @@ router.post("/register",signupController);
 router.post("/login",loginController);
 router.get("/profile",authenticateJWT,getProfileController)
 router.get("/staff", authenticateJWT, authenticateStaff , getStaffController);
+router.get("/refresh-token",refreshTokenController);
 export default router;

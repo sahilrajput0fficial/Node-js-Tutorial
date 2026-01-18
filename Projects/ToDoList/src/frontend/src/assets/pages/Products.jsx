@@ -27,7 +27,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Spinner } from "@radix-ui/themes";
 import { getAvail } from "../api/delivery.api";
+import { useCart } from "@/context/CartContext";
 const Products = () => {
+  const {cartItems, setCartItems} = useCart();
   const params = useParams();
   //const [data, setdata] = useState({});
   const [availability, setAvailability] = useState(null);
@@ -78,6 +80,35 @@ const Products = () => {
       formattedETA,
     });
   };
+const AddtoCart = (prod, variantId) => {
+  setCartItems((prev) => {
+    const exists = prev.find(
+      (item) =>
+        item._id.toString() === prod._id.toString() &&
+        item.variant === variantId
+    );
+
+    if (exists) {
+      return prev.map((item) =>
+        item._id.toString() === prod._id.toString() &&
+        item.variant === variantId
+          ? { ...item, qty: item.qty + 1 }
+          : item
+      );
+    }
+
+    return [
+      ...prev,
+      {
+        ...prod,
+        qty: 1,
+        variant: variantId,
+      },
+    ];
+  });
+};
+
+
 
 
   const variantData = useMemo(() => {
@@ -416,6 +447,9 @@ const Products = () => {
                   variant="outline"
                   size="lg"
                   className="flex-1 text-base py-6"
+                  onClick = {()=>{
+                    AddtoCart(product,variantIdx);
+                  }}
                 >
                   Add To Cart
                 </Button>

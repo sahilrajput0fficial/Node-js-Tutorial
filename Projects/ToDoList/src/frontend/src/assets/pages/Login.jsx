@@ -38,13 +38,9 @@ export default function LoginModal({onSuccess}) {
     if(mode==="signup"){
       const resp = await signUp(data);
       onSuccess();
-      console.log("Signup successful:", resp);
-      
     }
     else{
-      const resp = await signIn(data);
-      console.log("Token received:", resp.data.token);
-      login(resp.data.token)
+      const resp = await login(data.email, data.password);
       onSuccess();
     }
     

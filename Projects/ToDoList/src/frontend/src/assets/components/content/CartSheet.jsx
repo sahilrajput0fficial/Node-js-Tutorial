@@ -11,13 +11,15 @@ import { useCart } from "@/context/CartContext";
 
 export default function CartSheet() {
   const { cartItems, setCartItems, isOpen, setIsOpen } = useCart();
+  console.log(cartItems)
 
-  const removeItem = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = (id,variant) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id || item.variant!=variant));
   };
+  const totalQuantity = cartItems?.reduce((accumulator,item)=> item.qty + accumulator,0)
 
   const totalPrice = cartItems?.reduce(
-    (total, item) => total + item.price * item.qty,
+    (total, item) => total + item.variants[item.variant].price * item.qty,
     0
   );
 
@@ -26,7 +28,7 @@ export default function CartSheet() {
       {/* Cart Button (Trigger) */}
       <Button variant="outline" onClick={() => setIsOpen(true)}>
         <ShoppingCart className="w-5 h-5 mr-2" />
-        Cart ({cartItems?.length})
+        Cart ({totalQuantity})
       </Button>
 
       {/* Cart Sheet */}
@@ -37,7 +39,7 @@ export default function CartSheet() {
           </SheetHeader>
 
           <div className="mt-4 space-y-4">
-            {cartItems?.length === 0 && (
+            {totalQuantity === 0 && (
               <p className="text-gray-500 text-sm text-center">
                 Your cart is empty
               </p>
@@ -45,20 +47,20 @@ export default function CartSheet() {
 
             {cartItems?.map((item) => (
               <div
-                key={item.id}
+                prod_key={item._id} var_key = {item.variant}
                 className="flex justify-between items-center border-b pb-2"
               >
                 <div>
-                  <p className="font-medium">{item.name}</p>
+                  <p className="font-medium">{item.name} - {item.variants[item.variant].color.name}</p>
                   <p className="text-sm text-gray-500">
-                    ₹{item.price} × {item.qty}
+                    ₹{item.variants[item.variant].price} × {item.qty}
                   </p>
                 </div>
 
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.id,item.variant)}
                   className="text-red-500"
                 >
                   ×

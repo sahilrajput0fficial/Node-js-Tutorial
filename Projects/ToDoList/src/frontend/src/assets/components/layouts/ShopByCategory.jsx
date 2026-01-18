@@ -9,7 +9,6 @@ const ShopByCategory = () => {
   useEffect(() => {
     const fetchCategories = async()=>{
       const data = await getCategory();
-      console.log(data);
       setCategoryData(data)
       
       return data

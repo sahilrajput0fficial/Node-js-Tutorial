@@ -14,7 +14,6 @@ const Profile = () => {
             setLoading(true);
             
             if (isAuthenticated) {
-                console.log("User not authenticated");
                 setLoading(false);
                 return false;
                 

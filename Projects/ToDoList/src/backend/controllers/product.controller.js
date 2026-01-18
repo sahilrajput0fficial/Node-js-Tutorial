@@ -1,7 +1,5 @@
 import { ProductModel } from "../models/product.models.js";
 
-
-
 export const getProductDataBySlug = async(req,res)=>{
     try{
         const slug = req.params.slug;
@@ -27,7 +25,7 @@ export const getProductDataBySlug = async(req,res)=>{
 }
 
 
-export const addProductData = async(req,res)=>{
+export const addProductData = async(req,res,next)=>{
     try{
         const products = req.body;
         if(!products){
@@ -52,23 +50,17 @@ export const addProductData = async(req,res)=>{
       
 
     }catch(err){
-        res.status(500).json({
-          message: "Internal Server Error",
-          error: err.message,
-        });
+        next(err);
 
     }
       
 }
 
-export const getAllproducts = async(req,res)=>{
+export const getAllproducts = async(req,res,next)=>{
     try{
         const data = await ProductModel.find()
         res.status(200).json(data)
     }catch(err){
-        res.status(500).json({
-            message:"Internal Server Error",
-            error:err.message
-        })   
+        next(err);  
     }  
 }

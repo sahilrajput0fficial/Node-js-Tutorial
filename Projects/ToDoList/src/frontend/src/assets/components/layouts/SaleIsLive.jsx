@@ -16,7 +16,6 @@ const SaleIsLive = () => {
     queryKey: ["products"],
     queryFn: getSaleLiveData, // MUST return data
   });
-  console.log(productList);
   
 
   if (isLoading) return <p>Loading products...</p>;

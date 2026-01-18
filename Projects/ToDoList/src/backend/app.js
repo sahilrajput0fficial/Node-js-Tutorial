@@ -8,9 +8,34 @@ import authRoutes from "./routes/auth.routes.js"
 import { createColor, getColors } from "./controllers/color.controller.js"
 import { addInventory, addPincode, addWarehouse, checkAvailability } from "./controllers/delivery.controller.js"
 import { authenticateJWT } from "./middlewares/authenticateJWT.js"
-export const app = express()
+import { errorMiddleware } from "./middlewares/errorMiddleware.js"
+import cookieParser from "cookie-parser"
 
-app.use(cors())
+export const app = express()
+if(process.env.NODE_ENV === "production"){
+    pass
+}
+else{
+    const corsOptions = {
+      origin: "http://localhost:5173",
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    };
+    app.use(cors(corsOptions));
+
+    //preflight request handling
+    // app.use((req, res, next) => {
+    //   if (req.method === "OPTIONS") {
+    //     return res.sendStatus(204);
+    //   }
+    //   next();
+    // });
+
+}
+app.use(cookieParser());// used to parse cookies from incoming requests
+
+//app.options("*", cors(corsOptions));(deprecated code for preflight requests)
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
@@ -37,4 +62,4 @@ app.get("/protected",authenticateJWT,(req,res)=>{
 
 
 
-
+app.use(errorMiddleware);

@@ -4,17 +4,16 @@ import api from "./axios";
 export const signUp = async(data)=>{
     const response =  await api.post("/auth/register",data,{
         headers:{
-    }
+    },
+    
 })
-    console.log(response);
     return response;
 }
 
 export const signIn = async(data)=>{
-    const token = await api.post("/auth/login",data
+    const response = await api.post("/auth/login",data,{withCredentials:true}
     )
-    console.log(token);
-    return token;
+    return response;
     
 }
 
@@ -27,3 +26,14 @@ export const getProfile = async(token)=>{
     
     return data.user;
 }
+
+export const refreshAccessToken = async () => {
+      const res = await axios.get("/auth/refresh-token", {
+        withCredentials: true,
+      });
+      const token = res.data.accessToken;
+      localStorage.setItem("authToken", token);
+      setAccessToken(token);
+      setIsAuthenticated(true);
+      return token;
+  };
