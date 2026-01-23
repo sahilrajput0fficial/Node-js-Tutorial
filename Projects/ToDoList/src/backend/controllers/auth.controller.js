@@ -6,7 +6,7 @@ export const signupController = async (req, res) => {
     const data = req.body;
     //console.log(data.password);
     const hashed = await bcrypt.hash(data.password, 10);
-    console.log(hashed);
+    console.log(data.password,hashed);
     const ifexists = await userModel.findOne({ email: data.email });
     if (ifexists) {
       return res.status(400).json({
@@ -73,7 +73,7 @@ export const loginController = async (req, res,next) => {
       const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, {
         expiresIn: "7d",
       });
-       res.cookie("refreshToken", refreshToken, {
+        res.cookie("refreshToken", refreshToken, {
          httpOnly: true,
          sameSite: "lax",
          secure:false,
@@ -106,9 +106,19 @@ export const getProfileController = async(req,res,next)=>{
     }
 }
 
-export const getStaffController = async(req,res)=>{
-    console.log("Inside stAFF ADMIN");
-    
+export const getStaffController = async(req,res,next)=>{
+    try {
+      const userId = req.user.userId;
+      const user = await userModel.findById(userId);
+      console.log(user);
+
+      res.status(200).json({
+        message: "Staff Profile fetched successfully",
+        user: user,
+      });
+    } catch (err) {
+      next(err);
+    }
 }
 
 

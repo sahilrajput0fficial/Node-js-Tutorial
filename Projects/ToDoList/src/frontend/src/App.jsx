@@ -6,6 +6,7 @@ import Category from './assets/pages/Category'
 import Products from './assets/pages/Products'
 import About from './assets/pages/About'
 import Profile from './assets/pages/Profile'
+import Staff from './assets/pages/Staff'
 const App = () => {
   return (
     <>
@@ -15,7 +16,9 @@ const App = () => {
         <Route path="/products/:slug" element={<Products/>}/>
         <Route path="/category" element={<Category/>}/>
         <Route path="/about" element={<About/>}/>
+        
         <Route path="/profile" element={<Profile/>}/>
+        <Route path="/staff" element={<Staff/>}/>
         {/* <Route path="/seller/add-product" element={<AddProd/>}/> */}
     </Routes>
     </>

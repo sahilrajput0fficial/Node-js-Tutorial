@@ -1,7 +1,5 @@
 import express from "express"
 import cors from "cors"
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
 import categoryRoutes from "./routes/category.routes.js"
 import productRoutes from "./routes/products.routes.js"
 import authRoutes from "./routes/auth.routes.js"
@@ -10,6 +8,8 @@ import { addInventory, addPincode, addWarehouse, checkAvailability } from "./con
 import { authenticateJWT } from "./middlewares/authenticateJWT.js"
 import { errorMiddleware } from "./middlewares/errorMiddleware.js"
 import cookieParser from "cookie-parser"
+import { googleOAuth,googleOAuthCallback } from "./controllers/oauth.controller.js"
+
 
 export const app = express()
 if(process.env.NODE_ENV === "production"){
@@ -17,7 +17,7 @@ if(process.env.NODE_ENV === "production"){
 }
 else{
     const corsOptions = {
-      origin: "http://localhost:5173",
+      origin: process.env.FRONTEND_URL,
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
@@ -33,15 +33,22 @@ else{
     // });
 
 }
-app.use(cookieParser());// used to parse cookies from incoming requests
+app.use(cookieParser());  // used to parse cookies from incoming requests
 
 //app.options("*", cors(corsOptions));(deprecated code for preflight requests)
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-
+//<------------------Auth Routes------------------>
 app.use("/api/auth",authRoutes)
+
+//<------------------OAuth Google Routes------------------>
+app.get("/google",googleOAuth);
+app.get("/google/callback",googleOAuthCallback);
+
+//<------------------Category Routes------------------>
 app.use("/api/category",categoryRoutes)
 
+//<------------------Product Routes------------------>
 app.use("/api/products",productRoutes);
 
 
@@ -57,9 +64,6 @@ app.get("/protected",authenticateJWT,(req,res)=>{
     res.json({message:"Protected Route Accessed"})
     return;
 })
-
-
-
 
 
 app.use(errorMiddleware);

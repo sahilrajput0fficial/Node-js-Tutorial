@@ -27,6 +27,16 @@ export const getProfile = async(token)=>{
     return data.user;
 }
 
+export const getStaff = async (token) => {
+  const { data } = await api.get("/auth/staff", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data.user;
+};
+
 export const refreshAccessToken = async () => {
       const res = await axios.get("/auth/refresh-token", {
         withCredentials: true,

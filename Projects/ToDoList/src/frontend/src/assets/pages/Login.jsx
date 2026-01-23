@@ -215,7 +215,11 @@ export default function LoginModal({onSuccess}) {
               ):(
                 <p>Already have an account? <span className="text-red-600">Login</span></p>
                 )}
+      
       </button>
+      <button onClick={()=>{
+        window.location.href = "http://localhost:5000/google";
+      }}type="button">Sign In with Google</button>
     </>
   )
 }

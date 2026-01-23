@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { CategorySchema } from "./category.models.js";
 export const variantsSchema = new mongoose.Schema({
   color: {
     type: mongoose.Schema.Types.ObjectId,

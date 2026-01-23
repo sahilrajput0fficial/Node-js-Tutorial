@@ -19,8 +19,6 @@ export default function UserProfile() {
   const { isAuthenticated, logout } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
   const navigate = useNavigate();
-
-  // 🔐 NOT LOGGED IN
   if (!isAuthenticated) {
     return (
       <Dialog open={loginOpen} onOpenChange={setLoginOpen}>

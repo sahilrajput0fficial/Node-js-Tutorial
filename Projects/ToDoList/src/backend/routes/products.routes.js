@@ -3,7 +3,6 @@ import {
   getProductDataBySlug,
   getAllproducts,
 } from "../controllers/product.controller.js";
-import { ProductModel } from "../models/product.models.js";
 import express from "express";
 
 const router = express.Router();

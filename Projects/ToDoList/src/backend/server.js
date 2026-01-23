@@ -1,13 +1,7 @@
-import dotenv from "dotenv"
-import { app } from "./app.js"
-import { connect } from "mongoose"
-import connectDb from "./config/db.js"
-import "./models/color.models.js"
-dotenv.config()
-
-
-connectDb()
-
+import "./bootstrap.js";
+import { app } from "./app.js";
+import connectDb from "./config/db.js";
+connectDb();
 // import path from "path"
 // import fs from "fs"
 
@@ -20,16 +14,13 @@ connectDb()
 //     let [val , data ]=elem.split("=")
 //     result[val.trim("\r")] = data.trim("\r");
 // });
-// const PORT = result.PORT 
+// const PORT = result.PORT
 
-const PORT = process.env.PORT
-app.listen(PORT,(error)=>{
-    if(error){
-        console.log("PORT not valid");
-        
-    }
-    else{
-        console.log(`Successfully run on ${PORT}`);
-        
-    }
-})
+const PORT = process.env.PORT;
+app.listen(PORT, (error) => {
+  if (error) {
+    console.log("PORT not valid");
+  } else {
+    console.log(`Successfully run on ${PORT}`);
+  }
+});

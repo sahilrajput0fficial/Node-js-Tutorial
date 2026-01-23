@@ -6,40 +6,49 @@ import Loading from '@/components/ui/loading';
 const Profile = () => {
     const [loading, setLoading] = useState(null);
     const { isAuthenticated } = useAuth();
+    const [profileData, setProfileData] = useState(null);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            setLoading(false);
+            return;
+        }
 
-        // Fetch user profile data here
         const fetchProfile = async () => {
-            setLoading(true);
-            
-            if (isAuthenticated) {
-                setLoading(false);
-                return false;
-                
-            }
             try {
                 const token = localStorage.getItem("authToken");
                 const response = await getProfile(token);
-                console.log("Profile data:", response);
-                setLoading(false);
+                setProfileData(response.data);
             } catch (err) {
                 console.error("Error fetching profile:", err);
+            } finally {
+                setLoading(false);
             }
+        };
 
-
-        }
         fetchProfile();
+    }, [isAuthenticated]);
+    if (loading) {
+        return (<Loading />);
 
-    }, [])
+    }
+    else if (!isAuthenticated) {
+        return (
+            <>
+                <p>Sorry ! not authenticated</p>
+            </>
+        )
+    }
+    else {
+        return (
+            <>
+                <h1>Profile Page</h1>
 
-    return (
-        <>
-            <h1>Profile Page</h1>
-            {loading && <Loading/>}
 
-        </>
-    )
+            </>
+        )
+    }
+
 }
 
 export default Profile
