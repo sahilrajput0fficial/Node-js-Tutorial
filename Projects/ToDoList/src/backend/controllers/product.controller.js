@@ -27,31 +27,19 @@ export const getProductDataBySlug = async(req,res)=>{
 
 export const addProductData = async(req,res,next)=>{
     try{
-        const products = req.body;
-        if(!products){
+        const product = req.body;
+        if(!product){
             res.status(400).json({
                 message :"No Data Entered"
             })
             return;
         }
+
+        res.json(product);
         
-        const inserted = await ProductModel.insertMany(products)
-        const array =[]
-        inserted.forEach(({_id})=>{
-            array.push(_id)
-
-
-        })
-        res.status(200).json({
-            message:"Inserted",
-            insertedData: array
-        })
-        
-      
-
-    }catch(err){
+    }
+    catch(err){
         next(err);
-
     }
       
 }

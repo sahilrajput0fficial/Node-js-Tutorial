@@ -10,6 +10,8 @@ const ShopByCategory = () => {
     const fetchCategories = async()=>{
       const data = await getCategory();
       setCategoryData(data)
+      console.log(data);
+      
       
       return data
     }

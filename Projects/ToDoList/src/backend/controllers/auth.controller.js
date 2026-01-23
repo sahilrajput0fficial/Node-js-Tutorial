@@ -2,6 +2,11 @@ import { userModel } from "../models/auth.models.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 export const signupController = async (req, res) => {
+  if(!req.body){
+    return res.json({
+        message :"Data Missing"
+    })
+  }
   try {
     const data = req.body;
     //console.log(data.password);
@@ -37,6 +42,12 @@ export const signupController = async (req, res) => {
 
 export const loginController = async (req, res,next) => {
     try{
+      if(!req.body){
+         res.status(400).json({
+          message:"Details Missing"
+        })
+        return;
+      }
       const { email, password } = req.body;
       if (!email || !password) {
         res.status(400).json({

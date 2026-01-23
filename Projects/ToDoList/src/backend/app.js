@@ -17,7 +17,9 @@ if(process.env.NODE_ENV === "production"){
 }
 else{
     const corsOptions = {
-      origin: process.env.FRONTEND_URL,
+      origin: [process.env.FRONTEND_URL,
+        process.env.SELLER_URL
+      ],
       credentials: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],

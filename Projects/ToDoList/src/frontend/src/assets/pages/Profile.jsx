@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import Loading from '@/components/ui/loading';
 const Profile = () => {
     const [loading, setLoading] = useState(null);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated ,accessToken } = useAuth();
     const [profileData, setProfileData] = useState(null);
 
     useEffect(() => {
@@ -13,11 +13,9 @@ const Profile = () => {
             setLoading(false);
             return;
         }
-
         const fetchProfile = async () => {
             try {
-                const token = localStorage.getItem("authToken");
-                const response = await getProfile(token);
+                const response = await getProfile(accessToken);
                 setProfileData(response.data);
             } catch (err) {
                 console.error("Error fetching profile:", err);
