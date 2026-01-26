@@ -37,9 +37,7 @@ export const signupController = async (req, res) => {
       .status(500)
       .json({ message: "Internal Server Error", error: err.message });
   }
-};
-
-
+}
 export const loginController = async (req, res,next) => {
     try{
       if(!req.body){
@@ -100,7 +98,6 @@ export const loginController = async (req, res,next) => {
         next(err);
     }
 }
-
 export const getProfileController = async(req,res,next)=>{
     try{
         const userId = req.user.userId;
@@ -132,8 +129,6 @@ export const getStaffController = async(req,res,next)=>{
     }
 }
 
-
-
 export const refreshTokenController = (req, res) => {
     if(!req.cookies.refreshToken){
         return res.status(401).json({
@@ -163,5 +158,8 @@ export const refreshTokenController = (req, res) => {
         })
     }
 }
+
+
+
 
 

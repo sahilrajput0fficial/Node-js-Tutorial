@@ -13,6 +13,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   signup: (email: string, password: string, name: string, storeName: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  accessToken:string;
+  sellerId: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,7 +29,8 @@ const DEMO_USER: User = {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [accessToken, setAccessToken] = useState("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTY2OGRkNjY4MWU5NTQzN2U1NDVhNzUiLCJlbWFpbCI6InJhanBvb3RzYWhpbDkwMDBAZ21haWwuY29tIiwicm9sZSI6InNlbGxlciIsImlhdCI6MTc2OTQzOTgyOSwiZXhwIjoxNzY5NDQzNDI5fQ.uOlBeyXMeDyTOp57UjjcwzA1WHWt9q2V9mbIN9Clq-g");
+  const [sellerId, setSellerId] = useState("665f2e1b9b2c4a001f8a91a1")
   useEffect(() => {
     const storedUser = localStorage.getItem('seller_user');
     if (storedUser) {
@@ -37,7 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
     
     // Demo credentials check
@@ -73,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, accessToken,login, signup, logout ,sellerId}}>
       {children}
     </AuthContext.Provider>
   );
