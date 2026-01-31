@@ -4,7 +4,7 @@ import { CategorySchema } from "./category.models.js";
 import slugify from "slugify";
 
 export const variantsSchema = new mongoose.Schema({
-  color: [colorSchema],
+  color: colorSchema,
   images: [String],
   price: Number,
   stock: Number,

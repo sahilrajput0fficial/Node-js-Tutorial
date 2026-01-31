@@ -1,12 +1,11 @@
 import jwt from "jsonwebtoken";
 
 export const authenticateJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
+  const authHeader = req.cookies["accessToken"];
   if (!authHeader) {
     return res.status(401).json({ message: "Access Token missing" });
   }
-  const token = authHeader.split(" ")[1];
+  const token = authHeader;
   if (!token) {
     return res.status(401).json({ message: "Invalid Authorization format" });
   }

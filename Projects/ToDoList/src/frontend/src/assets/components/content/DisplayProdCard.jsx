@@ -7,7 +7,7 @@ const DisplayProdCard = ({data}) => {
             <div className="bg-[#FAFAFA] rounded-xl pb-2 shadow-sm">
                 <div className="relative flex flex-col justify-center items-center object-contain">
                     <span className="font-mono absolute py-0.5 left-0 top-0 px-1 bg-black text-white text-xs rounded-md rounded-l-xl rounded-b-md font-bold">{data.metatitle}</span>
-                    <img className="rounded-t-xl w-full h-48" src="/300_bLACK-min.avif" alt="boatEnergyShroom" />
+                    <img className="rounded-t-xl w-full h-48" src={data.variants[0].images[0]} alt="boatEnergyShroom" />
                     <div className=" rounded-b-xl bg-[#FCC50B] w-full px-2 flex justify-between items-center gap-2 py-2">
                         <span className="font-medium text-xs">{data.prop[0]}</span>
                         <div className=" flex justify-center items-center gap-1 bg-white h-4 p-2 rounded-sm">

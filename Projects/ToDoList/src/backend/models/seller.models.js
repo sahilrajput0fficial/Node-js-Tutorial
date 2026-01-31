@@ -1,12 +1,22 @@
 import mongoose from "mongoose";
+import slugify from "slugify";
 
 const sellerSchema = new mongoose.Schema(
   {
-    name: {
+    fName: {
       type: String,
       required: true,
       trim: true,
       index: true,
+    },
+    lName: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+    storeName : {
+      type: String,
+      unique :true
     },
 
     slug: {
@@ -15,11 +25,10 @@ const sellerSchema = new mongoose.Schema(
       index: true,
     },
 
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
+    password: {
+      type: String,
       required: true,
-      unique: true, 
+      unique: true,
     },
 
     email: {
@@ -31,6 +40,10 @@ const sellerSchema = new mongoose.Schema(
 
     phone: {
       type: String,
+    },
+    role : {
+      type : String,
+      default : 'seller'
     },
 
     logo: String,
@@ -106,5 +119,13 @@ const sellerSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
+sellerSchema.pre("validate", async function () {
+  const name = this.fName + this.lName;
+  if (!this.slug) {
+    this.slug = slugify(name, {
+      lower: true,
+      strict: true
+    });
+  }
+});
 export const SellerModel = mongoose.model("sellers", sellerSchema);

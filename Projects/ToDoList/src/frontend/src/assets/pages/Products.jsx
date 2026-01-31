@@ -323,10 +323,11 @@ const AddtoCart = (prod, variantId) => {
                     <button
                       key={option.name}
                       onClick={() => {
+                        console.log(option.code)
                         setSelectedColor(index);
                         setVariantIdx(index);
                       }}
-                      style={{ backgroundColor: option.code }}
+                      style={{ backgroundColor: option.code || "black"}}
                       className={`w-10 h-10 rounded-full border-2 transition-all ${
                         selectedColor === index
                           ? "border-primary ring-2 ring-primary/30"

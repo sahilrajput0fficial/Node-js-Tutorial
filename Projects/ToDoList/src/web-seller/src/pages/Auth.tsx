@@ -51,12 +51,17 @@ const Auth = () => {
     const storeName = formData.get('storeName') as string;
     
     const result = await signup(email, password, name, storeName);
+    if(result.error){
+
+    }
+    console.log(result);
     setIsLoading(false);
     
     if (result.success) {
       navigate('/dashboard');
     } else {
       setError(result.error || 'Signup failed');
+      setIsLoading(false);
     }
   };
 

@@ -4,18 +4,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const Index = () => {
-  const { user, isLoading } = useAuth();
+  const { isAuthenticated,user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log(isAuthenticated);
     if (!isLoading) {
-      if (user) {
+      if (isAuthenticated) {
         navigate('/dashboard');
       } else {
         navigate('/auth');
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [isAuthenticated,user, isLoading, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">

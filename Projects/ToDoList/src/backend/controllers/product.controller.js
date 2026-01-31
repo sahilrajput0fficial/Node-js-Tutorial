@@ -12,6 +12,7 @@ export const getProductDataBySlug = async (req, res) => {
       return;
     }
     const data = await ProductModel.findOne({ slug: slug });
+    console.log(data);
     res.status(200).json(data);
   } catch (err) {
     res.status(500).json({
@@ -24,7 +25,7 @@ export const getProductDataBySlug = async (req, res) => {
 export const addProductData = async (req, res, next) => {
   try {
     const productData = JSON.parse(req.body.productData);
-    const sellerId = req.cookies["seller-id"];
+    const sellerId = req.sellerId;
     if(!sellerId){
       return res.status(401).json({
         message:"Unauthorised"
@@ -93,10 +94,7 @@ export const getAllproducts = async (req, res, next)=>{
 
 export const getSellerProduct = async(req,res,next)=>{
   try{
-    console.log("Process 1 Executing ")
-
-    const sellerId = req.cookies["seller-id"];
-        console.log("Seller is", sellerId);
+    const sellerId = req.sellerId;
     if (!sellerId) {
       return res.status(401).json({
         message: "Unauthorised",

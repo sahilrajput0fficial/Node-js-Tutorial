@@ -42,7 +42,7 @@ export function DashboardSidebar() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold">{user?.storeName || 'My Store'}</span>
-            <span className="text-xs text-muted-foreground">{user?.email}</span>
+            <span className="text-xs text-muted-foreground">{user.email}</span>
           </div>
         </div>
       </SidebarHeader>
