@@ -1,24 +1,20 @@
-import { useState ,useEffect} from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DialogClose,
-  DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useForm } from "react-hook-form"
-import { signIn, signUp } from "../api/auth.api"
-import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "@/context/AuthContext"
 
-export default function LoginModal({onSuccess}) {
+export default function LoginModal({ onSuccess }) {
   const [mode, setMode] = useState("login")
-  const {login } = useAuth();
-  
+  const { login } = useAuth()
 
   const {
     register,
@@ -34,192 +30,209 @@ export default function LoginModal({onSuccess}) {
     reset()
   }, [mode, reset])
 
-  const onSubmit = async(data) => {
-    if(mode==="signup"){
-      const resp = await signUp(data);
-      onSuccess();
+  const onSubmit = async (data) => {
+    if (mode === "signup") {
+      await signUp(data)
+      onSuccess()
+    } else {
+      await login(data.email, data.password)
+      onSuccess()
     }
-    else{
-      const resp = await login(data.email, data.password);
-      onSuccess();
-    }
-    
   }
+
+  const inputStyle =
+    "rounded-xl bg-background border-border focus:ring-2 focus:ring-primary/40 focus:border-primary"
+
+  const errorStyle = "text-sm text-destructive mt-1"
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{mode === "login" ? "Login" : "Create Account"}</DialogTitle>
-        <DialogDescription>
-           {mode === "login"
-            ? "Enter your credentials to log in"
-            : "Fill details to create a new account"}
+        <DialogTitle className="text-xl font-semibold text-foreground">
+          {mode === "login" ? "Welcome Back" : "Create Account"}
+        </DialogTitle>
+        <DialogDescription className="text-muted-foreground">
+          {mode === "login"
+            ? "Sign in to continue your journey"
+            : "Fill in your details to get started"}
         </DialogDescription>
       </DialogHeader>
 
-
-      {mode==="login"?(
-        // Login Form
-        <form method="POST" onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid gap-4 py-4">
-
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+      {mode === "login" ? (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+          <div className="space-y-2">
+            <Label>Email</Label>
             <Input
-              id="email"
               type="email"
               placeholder="Enter your email"
+              className={inputStyle}
               {...register("email", { required: "Email is required" })}
             />
             {errors.email && (
-              <p className="text-sm text-red-500">{errors?.email.message}</p>
+              <p className={errorStyle}>{errors.email.message}</p>
             )}
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-2">
+            <Label>Password</Label>
             <Input
-              id="password"
               type="password"
               placeholder="Enter your password"
+              className={inputStyle}
               {...register("password", {
                 required: "Password is required",
-                minLength: {
-                  value: 8,
-                  message: "Password must be at least 8 characters"
-                },
-                pattern: {
-                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-                  message:
-                    "Password must include uppercase, lowercase, number, and special character"
-                }
+                minLength: { value: 8, message: "Minimum 8 characters" },
               })}
             />
             {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
+              <p className={errorStyle}>{errors.password.message}</p>
             )}
           </div>
 
-        </div>
+          <DialogFooter className="pt-2">
+            <DialogClose asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl border-border"
+              >
+                Cancel
+              </Button>
+            </DialogClose>
 
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button type="submit">{mode === "login" ? "Login" : "Sign Up"}</Button>
-
-
-          
-        </DialogFooter>
-      </form>
-      ):(
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-2 gap-4 py-4">
-
-            <div className="grid gap-2">
+            <Button
+              type="submit"
+              className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+            >
+              Login
+            </Button>
+          </DialogFooter>
+        </form>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
               <Label>First Name</Label>
               <Input
                 placeholder="John"
-                {...register("firstName", { required: "First name is required" })}
+                className={inputStyle}
+                {...register("firstName", {
+                  required: "First name is required",
+                })}
               />
-              {errors.fname && (
-                <p className="text-sm text-red-500">{errors.fname.message}</p>
+              {errors.firstName && (
+                <p className={errorStyle}>{errors.firstName.message}</p>
               )}
             </div>
 
-            <div className="grid gap-2">
+            <div className="space-y-2">
               <Label>Last Name</Label>
               <Input
                 placeholder="Doe"
-                {...register("lastName", { required: "Last name is required" })}
+                className={inputStyle}
+                {...register("lastName", {
+                  required: "Last name is required",
+                })}
               />
-              {errors.lname && (
-                <p className="text-sm text-red-500">{errors.lname.message}</p>
+              {errors.lastName && (
+                <p className={errorStyle}>{errors.lastName.message}</p>
               )}
             </div>
+          </div>
 
-            <div className="grid col-span-2 gap-2">
-            <Label htmlFor="email">Email</Label>
+          <div className="space-y-2">
+            <Label>Email</Label>
             <Input
-              id="email"
               type="email"
               placeholder="Enter your email"
+              className={inputStyle}
               {...register("email", { required: "Email is required" })}
             />
             {errors.email && (
-              <p className="text-sm text-red-500">{errors?.email.message}</p>
+              <p className={errorStyle}>{errors.email.message}</p>
             )}
           </div>
 
-            <div className="grid gap-2 col-span-2">
-              <Label>Password</Label>
-              <Input
-                type="password"
-                placeholder="Enter password"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Minimum 8 characters",
-                  },
-                  pattern: {
-                    value:
-                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-                    message:
-                      "Must include uppercase, lowercase, number & symbol",
-                  },
-                })}
-              />
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password.message}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label>Password</Label>
+            <Input
+              type="password"
+              placeholder="Enter password"
+              className={inputStyle}
+              {...register("password", {
+                required: "Password is required",
+                minLength: { value: 8, message: "Minimum 8 characters" },
+              })}
+            />
+            {errors.password && (
+              <p className={errorStyle}>{errors.password.message}</p>
+            )}
+          </div>
 
-            <div className="grid gap-2 col-span-2">
-              <Label>Confirm Password</Label>
-              <Input
-                type="password"
-                placeholder="Confirm password"
-                {...register("confirmPassword", {
-                  required: "Confirm your password",
-                  validate: (value) =>
-                    value === password || "Passwords do not match",
-                })}
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
+          <div className="space-y-2">
+            <Label>Confirm Password</Label>
+            <Input
+              type="password"
+              placeholder="Confirm password"
+              className={inputStyle}
+              {...register("confirmPassword", {
+                required: "Confirm your password",
+                validate: (value) =>
+                  value === password || "Passwords do not match",
+              })}
+            />
+            {errors.confirmPassword && (
+              <p className={errorStyle}>
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-xl border-border"
+              >
+                Cancel
+              </Button>
             </DialogClose>
-            <Button type="submit">{mode==="login" ?`Login`:`Sign Up`}</Button>
+
+            <Button
+              type="submit"
+              className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+            >
+              Sign Up
+            </Button>
           </DialogFooter>
         </form>
       )}
 
-      
-      <button href="" className="text-sm text-muted-foreground hover:underline"
-          onClick={()=>{
-            setMode(mode === "login" ? "signup":"login") 
+      {/* Toggle Mode */}
+      <div className="text-center mt-6">
+        <button
+          className="text-sm text-muted-foreground hover:text-primary transition"
+          onClick={() =>
+            setMode(mode === "login" ? "signup" : "login")
+          }
+        >
+          {mode === "login"
+            ? "New here? Create an account"
+            : "Already have an account? Login"}
+        </button>
+      </div>
 
-          }}>
-            {mode === "login"?(
-              <p>New to the BoAt Platform? <span className="text-red-600">SignUp Now</span></p>
-              ):(
-                <p>Already have an account? <span className="text-red-600">Login</span></p>
-                )}
-      
-      </button>
-      <button onClick={()=>{
-        window.location.href = "http://localhost:5000/google";
-      }}type="button">Sign In with Google</button>
+      {/* Google Sign In */}
+      <Button
+        variant="outline"
+        className="w-full mt-4 rounded-xl border-border hover:bg-muted transition"
+        onClick={() => {
+          window.location.href = "http://localhost:5000/google"
+        }}
+      >
+        Sign In with Google
+      </Button>
     </>
   )
 }

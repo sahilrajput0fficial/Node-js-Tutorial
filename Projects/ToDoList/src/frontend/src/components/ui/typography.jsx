@@ -131,7 +131,7 @@ export function TypographyHeading({children,...props}){
     return (
 
 
-        <span className="text-[#1A2024] text-2xl text-left mb-3 font-normal mr-2" {...props}>
+        <span className="text-foreground text-2xl text-left mb-3 font-normal mr-2" {...props}>
             {children}
         </span>
     )

@@ -6,9 +6,8 @@ const HomeHeadings = ({H1,H2}) => {
     <TypographyHeading>
         {H1}
     </TypographyHeading>
-    <TypographyH3 className="relative font-medium after:block after:absolute after:h-0.5 after:w-6 after:bg-[#D83333] after:bottom-0 after:right-0">
+    <TypographyH3 className="relative font-bold text-boat-red after:block after:absolute after:h-0.5 after:w-8 after:bg-boat-red after:bottom-0 after:left-0">
         {H2}
-
     </TypographyH3>
     </>
   )

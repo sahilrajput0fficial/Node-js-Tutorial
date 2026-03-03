@@ -16,3 +16,23 @@ export const createColor = async(req,res)=>{
         insert : inserted._id
     })
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

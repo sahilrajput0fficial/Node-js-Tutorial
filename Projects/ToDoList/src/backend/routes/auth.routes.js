@@ -18,7 +18,6 @@ router.post("/register", signupController);
 router.post("/login", loginController);
 router.get("/google", googleOAuth);
 router.get("/google/callback", googleOAuthCallback);
-
 router.get("/profile", authenticateJWT, getProfileController);
 router.get("/staff", authenticateJWT, authenticateStaff, getStaffController);
 router.get("/refresh-token", refreshTokenController);

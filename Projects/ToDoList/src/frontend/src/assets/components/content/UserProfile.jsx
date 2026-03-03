@@ -40,14 +40,14 @@ export default function UserProfile() {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu >
       <DropdownMenuTrigger asChild>
         <button className="p-2 rounded-full hover:bg-gray-200">
           <User size={30} />
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent className="bg-black text-white" align="end">
         <DropdownMenuItem onClick={() => navigate("/profile")}>
           Profile
         </DropdownMenuItem>
