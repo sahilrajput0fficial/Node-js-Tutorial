@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import { getCouponStatus } from "../api/order.api";
 
 const OFFERS = [
     "Free delivery on orders above ₹999",
@@ -28,13 +29,14 @@ const Cart = () => {
     const [couponCode, setCouponCode] = useState("");
     const [couponApplied, setCouponApplied] = useState(false);
     const [couponError, setCouponError] = useState("");
+    const [couponDiscount, setCouponDiscount] = useState(0);
 
     /* ── helpers ── */
     const getItemPrice = (item) =>
-        item.variants?.[item.variant]?.price ?? item.price ?? 0;
+        item.price ?? 0;
 
     const getItemColor = (item) =>
-        item.variants?.[item.variant]?.color?.name ?? item.variant ?? "";
+        item.color?.name ?? item.variant ?? "";
 
     const getItemImage = (item) =>
         item.images?.[0] ?? item.image ?? "https://placehold.co/200x200?text=boAt";
@@ -58,12 +60,22 @@ const Cart = () => {
         localStorage.setItem("cart-items", JSON.stringify(updated));
     };
 
-    const handleApplyCoupon = () => {
+    const handleApplyCoupon = async () => {
         setCouponError("");
-        if (couponCode.trim().toUpperCase() === "BOAT200") {
-            setCouponApplied(true);
-            setCouponError("");
-        } else {
+        try {
+            const response = await getCouponStatus(couponCode);
+            if (response.success) {
+                setCouponCode(response.data.couponCode);
+                setCouponDiscount(response.data.discount_value);
+                setCouponApplied(true);
+                setCouponError("");
+            } else {
+                setCouponApplied(false);
+                setCouponError("Invalid coupon code. Try BOAT200.");
+            }
+        } catch (error) {
+            console.error("Coupon application failed:", error);
+            setCouponApplied(false);
             setCouponError("Invalid coupon code. Try BOAT200.");
         }
     };
@@ -72,6 +84,7 @@ const Cart = () => {
         setCouponApplied(false);
         setCouponCode("");
         setCouponError("");
+        setCouponDiscount(0);
     };
 
     /* ── price math ── */
@@ -81,7 +94,7 @@ const Cart = () => {
     );
     const totalQty = cartItems.reduce((acc, item) => acc + (item.qty || 1), 0);
     const shipping = subtotal > 999 ? 0 : 99;
-    const discount = couponApplied ? 200 : 0;
+    const discount = couponApplied ? couponDiscount : 0;
     const total = subtotal + shipping - discount;
 
     /* ── empty state ── */
@@ -321,7 +334,7 @@ const Cart = () => {
                                 <div className="flex items-center justify-between bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md px-3 py-2">
                                     <p className="text-xs text-green-700 dark:text-green-400 font-medium flex items-center gap-1.5">
                                         <CheckCircle2 className="h-3.5 w-3.5" />
-                                        BOAT200 — ₹200 off applied!
+                                        {couponCode} — ₹{couponDiscount} off applied!
                                     </p>
                                     <button
                                         onClick={handleRemoveCoupon}

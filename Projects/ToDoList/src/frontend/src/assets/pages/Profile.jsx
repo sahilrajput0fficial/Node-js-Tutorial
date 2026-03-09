@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 const Profile = () => {
     const [loading, setLoading] = useState(true);
-    const { isAuthenticated, accessToken, logout } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
     const [profileData, setProfileData] = useState(null);
 
     useEffect(() => {
@@ -17,7 +17,7 @@ const Profile = () => {
         }
         const fetchProfile = async () => {
             try {
-                const response = await getProfile(accessToken);
+                const response = await getProfile();
                 setProfileData(response.data);
             } catch (err) {
                 console.error("Error fetching profile:", err);
@@ -27,7 +27,7 @@ const Profile = () => {
         };
 
         fetchProfile();
-    }, [isAuthenticated, accessToken]);
+    }, [isAuthenticated]);
 
     if (loading) {
         return (
@@ -114,8 +114,8 @@ const Profile = () => {
                         <button
                             key={index}
                             className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border ${item.active
-                                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
-                                    : "bg-card text-foreground border-border/50 hover:border-primary/30 hover:bg-secondary/20"
+                                ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
+                                : "bg-card text-foreground border-border/50 hover:border-primary/30 hover:bg-secondary/20"
                                 }`}
                         >
                             <div className="flex items-center gap-3 font-semibold">

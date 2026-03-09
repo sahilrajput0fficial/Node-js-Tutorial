@@ -16,5 +16,4 @@ const connectDb = async () => {
     console.log(`Error ocuured ${err}`);
   }
 };
-
 export default connectDb;

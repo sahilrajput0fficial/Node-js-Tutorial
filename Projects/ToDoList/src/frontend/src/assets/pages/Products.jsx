@@ -138,10 +138,27 @@ const Products = () => {
   /* ── Cart ── */
   const AddtoCart = (prod, vId) => {
     setCartItems((prev) => {
-      const exists = prev.find((i) => i._id.toString() === prod._id.toString() && i.variant === vId);
-      const updated = exists
-        ? prev.map((i) => (i._id.toString() === prod._id.toString() && i.variant === vId ? { ...i, qty: i.qty + 1 } : i))
-        : [...prev, { ...prod, qty: 1, variant: vId }];
+      const exists = prev.find((i) => i._id === prod._id && i.variant === vId);
+      console.log(exists);
+
+
+      let updated = exists
+      if (updated) {
+        updated = prev
+          .map((item) =>
+            item._id === prod._id && item.variant === vId
+              ? { ...item, qty: Math.max(1, (item.qty || 1) + 1) }
+              : item
+          );
+        //console.log(updated);
+
+      }
+      else {
+        let { variants, ...item } = prod;
+        // Destructure to exclude the variant's _id so it doesn't overwrite the product's _id
+        const { _id: _, ...variantDetails } = variants[vId];
+        updated = [...prev, { ...item, ...variantDetails, qty: 1, variant: vId }];
+      }
       localStorage.setItem("cart-items", JSON.stringify(updated));
       return updated;
     });

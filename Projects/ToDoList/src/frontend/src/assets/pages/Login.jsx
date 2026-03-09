@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useForm } from "react-hook-form"
 import { useAuth } from "@/context/AuthContext"
+import { signUp } from "@/assets/api/auth.api"
 
 export default function LoginModal({ onSuccess }) {
   const [mode, setMode] = useState("login")

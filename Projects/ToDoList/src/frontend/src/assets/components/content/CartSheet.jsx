@@ -30,7 +30,7 @@ export default function CartSheet() {
   const totalPrice = cartItems.reduce(
     (total, item) =>
       total +
-      (item.variants?.[item.variant]?.price || 0) * (item.qty || 0),
+      (item?.price || 0) * (item.qty || 0),
     0
   );
 
@@ -64,10 +64,10 @@ export default function CartSheet() {
                 <div>
                   <p className="font-medium">
                     {item.name} –{" "}
-                    {item.variants[item.variant].color.name}
+                    {item.color.name}
                   </p>
                   <p className="text-sm text-gray-500">
-                    ₹{item.variants[item.variant].price} × {item.qty}
+                    ₹{item.price} × {item.qty}
                   </p>
                 </div>
 

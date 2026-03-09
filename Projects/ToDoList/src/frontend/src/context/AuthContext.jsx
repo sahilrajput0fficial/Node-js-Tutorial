@@ -11,44 +11,35 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!!token) { 
-        setAccessToken(token); 
-        setIsAuthenticated(true); 
-    } 
-    else {
-        refreshAccessToken(); 
-    }
-    
+    // Attempt to restore session from cookie on load
+    refreshAccessToken();
   }, []);
 
   const login = async (email, password) => {
     const res = await signIn({ email, password });
-    const token = res.data.token;
-    if(token == undefined) return;
-    localStorage.setItem("authToken", token);
-    setAccessToken(token);
+    const token = res.data.token; // Even if it's in a cookie, backend might return it for in-memory use
+    setAccessToken(token || null);
     setIsAuthenticated(true);
   };
 
   const logout = async () => {
-    //await axios.post("/api/auth/logout", {}, { withCredentials: true });
-    localStorage.removeItem("authToken");
+    // Option: notify backend to clear cookie
+    // await api.post("/auth/logout");
     setAccessToken(null);
     setIsAuthenticated(false);
   };
 
   const refreshAccessToken = async () => {
     try {
-      const res = await api.get("/auth/refresh-token", { withCredentials: true });
+      const res = await api.get("/auth/refresh-token");
       const token = res.data.token;
-      
-      localStorage.setItem("authToken", token);
-      setAccessToken(token);
+
+      setAccessToken(token || null);
       setIsAuthenticated(true);
       return token;
     } catch {
-      logout();
+      setIsAuthenticated(false);
+      setAccessToken(null);
       return null;
     }
   };

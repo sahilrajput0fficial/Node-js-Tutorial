@@ -11,6 +11,8 @@ import Profile from "./assets/pages/Profile";
 import Staff from "./assets/pages/Staff";
 import Checkout from "./assets/pages/Checkout";
 import Cart from "./assets/pages/Cart";
+import Orders from "./assets/pages/Orders";
+import NotFound from "./assets/pages/NotFound";
 
 const App = () => {
   return (
@@ -70,9 +72,21 @@ const App = () => {
         }
       />
 
+      <Route
+        path="/orders"
+        element={
+          <MainLayout>
+            <Orders />
+          </MainLayout>
+        }
+      />
+
       {/* Routes WITHOUT Navbar */}
       <Route path="/cart" element={<Cart />} />
       <Route path="/checkout" element={<Checkout />} />
+
+      {/* Catch-all route for 404 Pages */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

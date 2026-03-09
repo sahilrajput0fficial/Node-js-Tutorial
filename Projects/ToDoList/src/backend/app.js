@@ -4,6 +4,8 @@ import categoryRoutes from "./routes/category.routes.js"
 import productRoutes from "./routes/products.routes.js"
 import authRoutes from "./routes/auth.routes.js"
 import sellerRoutes from "./routes/sellerAuth.routes.js"
+import orderRoutes from "./routes/order.routes.js"
+import couponRoutes from "./routes/coupon.routes.js"
 import { createColor, getColors } from "./controllers/color.controller.js"
 import { addInventory, addPincode, addWarehouse, checkAvailability } from "./controllers/delivery.controller.js"
 import { authenticateJWT } from "./middlewares/authenticateJWT.js"
@@ -53,6 +55,13 @@ app.use("/api/category",categoryRoutes)
 
 //<------------------Product Routes------------------>
 app.use("/api/products",productRoutes);
+
+
+//<------------------Order Routes--------------->
+app.use("/api/order",orderRoutes);
+
+//<--------------Coupon Routes----------------->
+app.use("/api/coupon", couponRoutes);
 
 //<------------------Seller Auth Routes---------------->
 app.use("/api/seller", sellerRoutes);
