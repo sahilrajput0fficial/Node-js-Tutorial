@@ -1,14 +1,16 @@
 import Logo from "../content/Logo";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import Search from "../content/Search";
-import { ShoppingBag, ShoppingBagIcon, User } from "lucide-react";
+import { Heart } from "lucide-react";
 import { memo } from "react";
 import TopBar from "../content/TopBar";
 import UserProfile from "../content/UserProfile";
 import CartSheet from "../content/CartSheet";
 import { UserMenu } from "../content/UserMenu";
+import { useWishlist } from "@/context/WishlistContext";
 
 const Navbar = memo(function () {
+  const { count } = useWishlist();
   return (
     <>
       <div className="sticky top-0 z-50">
@@ -46,6 +48,15 @@ const Navbar = memo(function () {
             </div>
             <div className="flex flex-row items-center gap-4 lg:gap-6">
               <Search />
+              {/* Wishlist Icon */}
+              <Link to="/wishlist" className="relative inline-flex items-center justify-center w-9 h-9 rounded-full hover:bg-secondary/60 transition-colors" aria-label="Wishlist">
+                <Heart className="w-5 h-5 text-muted-foreground hover:text-rose-500 transition-colors" />
+                {count > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {count > 9 ? '9+' : count}
+                  </span>
+                )}
+              </Link>
               <div>
                 <UserProfile />
               </div>

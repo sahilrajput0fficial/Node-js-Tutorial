@@ -1,194 +1,263 @@
 import React, { useEffect, useState } from 'react'
-import api from '../api/axios';
 import { getProfile } from '../api/auth.api';
 import { useAuth } from '@/context/AuthContext';
-import { User, Mail, Shield, Package, Settings, LogOut, ChevronRight, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Link, useNavigate } from 'react-router-dom';
+import { User, Mail, Phone, Shield, Package, Settings, LogOut, ChevronRight, MapPin, Heart, Clock, CreditCard, HelpCircle, Bell } from 'lucide-react';
 
 const Profile = () => {
     const [loading, setLoading] = useState(true);
     const { isAuthenticated, logout } = useAuth();
     const [profileData, setProfileData] = useState(null);
+    const [activeSection, setActiveSection] = useState("personal");
+    const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            setLoading(false);
-            return;
-        }
-        const fetchProfile = async () => {
+        if (!isAuthenticated) { setLoading(false); return; }
+        (async () => {
             try {
                 const response = await getProfile();
                 setProfileData(response.data);
-            } catch (err) {
-                console.error("Error fetching profile:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProfile();
+            } catch (err) { console.error("Error fetching profile:", err); }
+            finally { setLoading(false); }
+        })();
     }, [isAuthenticated]);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-                <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                <p className="mt-4 text-muted-foreground font-medium animate-pulse">Loading your profile...</p>
-            </div>
-        );
-    }
+    if (loading) return (
+        <div className="min-h-screen bg-[#f5f5f5] dark:bg-background flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
+        </div>
+    );
 
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-                <div className="w-24 h-24 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mb-6">
-                    <Shield className="w-12 h-12" />
-                </div>
-                <h2 className="text-3xl font-bold text-foreground mb-4">Authentication Required</h2>
-                <p className="text-muted-foreground max-w-md pb-8">You need to log in to view your profile and manage your orders.</p>
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-6 rounded-xl shadow-lg shadow-primary/20 transition-all hover:-translate-y-1">
-                    Log In Now
-                </Button>
+    if (!isAuthenticated) return (
+        <div className="min-h-screen bg-[#f5f5f5] dark:bg-background flex flex-col items-center justify-center text-center px-4">
+            <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+                <Shield className="w-8 h-8 text-destructive" />
             </div>
-        );
-    }
+            <h2 className="text-lg font-bold text-foreground mb-2">Authentication Required</h2>
+            <p className="text-sm text-muted-foreground max-w-xs mb-5">You need to log in to view your profile and manage your orders.</p>
+            <button onClick={() => navigate('/login')} className="h-10 px-6 bg-primary text-primary-foreground text-sm font-bold rounded hover:bg-primary/90 transition-colors">
+                Log In Now
+            </button>
+        </div>
+    );
+
+    const MENU = [
+        { key: "personal", icon: User, label: "Personal Information" },
+        { key: "orders", icon: Package, label: "My Orders", link: "/orders" },
+        { key: "wishlist", icon: Heart, label: "My Wishlist", link: "/wishlist" },
+        { key: "addresses", icon: MapPin, label: "Saved Addresses" },
+        { key: "payments", icon: CreditCard, label: "Payment Methods" },
+        { key: "notifications", icon: Bell, label: "Notifications" },
+        { key: "help", icon: HelpCircle, label: "Help & Support" },
+    ];
+
+    const createdDate = profileData?.createdAt
+        ? new Date(profileData.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })
+        : "Recently";
 
     return (
-        <div className="min-h-screen bg-background pb-24 animate-fade-in">
-            {/* Header / Hero Area */}
-            <div className="relative overflow-hidden bg-card border-b border-border">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-secondary/10 to-transparent"></div>
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-                <div className="max-w-7xl mx-auto px-6 lg:px-16 pt-20 pb-16 relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
-                    <div className="w-32 h-32 rounded-full border-4 border-background shadow-glass-dark bg-secondary/50 flex items-center justify-center relative group overflow-hidden">
-                        <img
-                            src={profileData?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileData?.name || 'User'}&backgroundColor=e2e8f0`}
-                            alt="Profile"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                            <span className="text-white text-xs font-semibold">Change</span>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 text-center md:text-left">
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-foreground tracking-tight">
-                            {profileData?.name || "Welcome Back"}
-                        </h1>
-                        <div className="flex flex-col md:flex-row gap-4 mt-4 text-muted-foreground items-center md:items-start justify-center md:justify-start">
-                            <span className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-full border border-border/50 text-sm">
-                                <Mail className="w-4 h-4 text-primary" />
-                                {profileData?.email || "user@example.com"}
-                            </span>
-                            {profileData?.phone && (
-                                <span className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-full border border-border/50 text-sm">
-                                    <Shield className="w-4 h-4 text-primary" />
-                                    {profileData.phone}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <Button
-                        onClick={logout}
-                        variant="destructive"
-                        className="rounded-xl font-semibold shadow-sm hover:shadow-md transition-all gap-2"
-                    >
-                        <LogOut className="w-4 h-4" /> Sign Out
-                    </Button>
+        <div className="min-h-screen bg-[#f5f5f5] dark:bg-background pb-12">
+            {/* Breadcrumb */}
+            <div className="bg-white dark:bg-card border-b border-border">
+                <div className="max-w-6xl mx-auto px-4 py-2.5">
+                    <nav className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Link to="/" className="hover:text-primary transition-colors">Home</Link>
+                        <ChevronRight className="w-3 h-3" />
+                        <span className="text-foreground font-medium">My Account</span>
+                    </nav>
                 </div>
             </div>
 
-            {/* Main Content Dashboard */}
-            <main className="max-w-7xl mx-auto px-6 lg:px-16 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Left navigation sidebar */}
-                <div className="lg:col-span-1 space-y-4 animate-slide-up">
-                    {[
-                        { title: "Personal Information", icon: User, active: true },
-                        { title: "My Orders", icon: Package, active: false },
-                        { title: "Saved Addresses", icon: MapPin, active: false },
-                        { title: "Account Settings", icon: Settings, active: false },
-                    ].map((item, index) => (
-                        <button
-                            key={index}
-                            className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-300 border ${item.active
-                                ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
-                                : "bg-card text-foreground border-border/50 hover:border-primary/30 hover:bg-secondary/20"
-                                }`}
-                        >
-                            <div className="flex items-center gap-3 font-semibold">
-                                <item.icon className="w-5 h-5" />
-                                {item.title}
-                            </div>
-                            <ChevronRight className={`w-5 h-5 ${item.active ? "opacity-100" : "opacity-40"}`} />
-                        </button>
-                    ))}
+            {/* Profile Header */}
+            <div className="bg-white dark:bg-card border-b border-border">
+                <div className="max-w-6xl mx-auto px-4 py-5 flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full border-2 border-border bg-secondary/30 overflow-hidden shrink-0">
+                        <img
+                            src={profileData?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profileData?.name || 'User'}&backgroundColor=e2e8f0`}
+                            alt="Profile" className="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h1 className="text-lg font-bold text-foreground">{profileData?.name || "Welcome Back"}</h1>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                            <Mail className="w-3.5 h-3.5" /> {profileData?.email || "user@example.com"}
+                        </p>
+                    </div>
+                    <button
+                        onClick={logout}
+                        className="hidden sm:flex items-center gap-1.5 h-9 px-4 border border-border text-sm font-medium text-muted-foreground rounded hover:border-destructive hover:text-destructive transition-colors"
+                    >
+                        <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
                 </div>
+            </div>
 
-                {/* Right content view */}
-                <div className="lg:col-span-2 space-y-8 animate-slide-up animate-stagger-2">
+            <div className="max-w-6xl mx-auto px-4 py-5">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
 
-                    {/* User Info Card */}
-                    <div className="bg-card shadow-sm rounded-3xl p-8 border border-border/50 transition-all hover:shadow-md">
-                        <h2 className="text-xl font-bold text-foreground mb-6 pb-4 border-b border-border/40">
-                            Personal Details
-                        </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-1">Full Name</p>
-                                <p className="text-lg font-medium text-foreground">{profileData?.name || "N/A"}</p>
+                    {/* Left Sidebar Menu */}
+                    <div className="lg:col-span-1">
+                        <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                            <div className="px-4 py-3 border-b border-border">
+                                <p className="text-sm font-bold text-foreground">My Account</p>
                             </div>
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-1">Email Address</p>
-                                <p className="text-lg font-medium text-foreground">{profileData?.email || "N/A"}</p>
+                            <nav className="divide-y divide-border/50">
+                                {MENU.map(item => (
+                                    <button
+                                        key={item.key}
+                                        onClick={() => item.link ? navigate(item.link) : setActiveSection(item.key)}
+                                        className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${activeSection === item.key && !item.link
+                                                ? "bg-primary/5 text-primary font-semibold border-l-2 border-primary"
+                                                : "text-foreground hover:bg-secondary/30"
+                                            }`}
+                                    >
+                                        <item.icon className="w-4 h-4 shrink-0" />
+                                        <span className="flex-1 text-left">{item.label}</span>
+                                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+                                    </button>
+                                ))}
+                            </nav>
+                            {/* Mobile Sign Out */}
+                            <div className="sm:hidden border-t border-border">
+                                <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-destructive/5 transition-colors">
+                                    <LogOut className="w-4 h-4" /> Sign Out
+                                </button>
                             </div>
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-1">Phone Number</p>
-                                <p className="text-lg font-medium text-foreground">{profileData?.phone || "Not provided"}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-1">Account Created</p>
-                                <p className="text-lg font-medium text-foreground">{profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString() : "Recently"}</p>
-                            </div>
-                        </div>
-
-                        <div className="pt-8 mt-8 border-t border-border/40">
-                            <Button variant="outline" className="font-semibold rounded-xl border-border/60 hover:bg-primary/5 hover:text-primary transition-all">
-                                Edit Details
-                            </Button>
                         </div>
                     </div>
 
-                    {/* Recent Orders Preview */}
-                    <div className="bg-card shadow-sm rounded-3xl p-8 border border-border/50 transition-all hover:shadow-md relative overflow-hidden">
-                        <div className="absolute right-0 top-0 w-32 h-32 bg-primary/5 rounded-bl-full pointer-events-none"></div>
+                    {/* Right Content */}
+                    <div className="lg:col-span-3 space-y-4">
 
-                        <div className="flex justify-between items-center mb-6 pb-4 border-b border-border/40">
-                            <h2 className="text-xl font-bold text-foreground">
-                                Recent Orders
-                            </h2>
-                            <Button variant="link" className="text-primary font-semibold hover:no-underline hover:opacity-80 p-0">
-                                View All
-                            </Button>
-                        </div>
-
-                        <div className="flex flex-col items-center justify-center py-12 text-center">
-                            <div className="w-16 h-16 bg-secondary/30 rounded-full flex items-center justify-center mb-4">
-                                <Package className="w-8 h-8 text-muted-foreground opacity-50" />
+                        {/* Personal Details Card */}
+                        {activeSection === "personal" && (
+                            <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                                <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-foreground">Personal Information</h2>
+                                    <button className="text-xs text-primary font-semibold hover:underline">Edit</button>
+                                </div>
+                                <div className="divide-y divide-border/50">
+                                    {[
+                                        { label: "Full Name", value: profileData?.name || "N/A", icon: User },
+                                        { label: "Email Address", value: profileData?.email || "N/A", icon: Mail },
+                                        { label: "Phone Number", value: profileData?.phone || "Not provided", icon: Phone },
+                                        { label: "Member Since", value: createdDate, icon: Clock },
+                                    ].map((field, i) => (
+                                        <div key={i} className={`flex items-center gap-4 px-5 py-3.5 ${i % 2 === 0 ? "bg-secondary/10" : ""}`}>
+                                            <field.icon className="w-4 h-4 text-muted-foreground shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs text-muted-foreground">{field.label}</p>
+                                                <p className="text-sm font-medium text-foreground">{field.value}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-foreground mb-2">No orders yet</h3>
-                            <p className="text-muted-foreground max-w-sm">When you buy products, your order history will appear here.</p>
-                            <Button className="mt-6 bg-foreground hover:bg-foreground/90 text-background font-semibold rounded-xl shadow-sm">
-                                Start Shopping
-                            </Button>
-                        </div>
-                    </div>
+                        )}
 
+                        {/* Addresses */}
+                        {activeSection === "addresses" && (
+                            <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                                <div className="px-5 py-3 border-b border-border flex items-center justify-between">
+                                    <h2 className="text-sm font-bold text-foreground">Saved Addresses</h2>
+                                    <button className="text-xs text-primary font-semibold hover:underline">+ Add New</button>
+                                </div>
+                                <div className="p-8 text-center">
+                                    <MapPin className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                                    <p className="text-sm font-semibold text-foreground mb-1">No saved addresses</p>
+                                    <p className="text-xs text-muted-foreground">Add an address for faster checkout.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Payments */}
+                        {activeSection === "payments" && (
+                            <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                                <div className="px-5 py-3 border-b border-border">
+                                    <h2 className="text-sm font-bold text-foreground">Payment Methods</h2>
+                                </div>
+                                <div className="p-8 text-center">
+                                    <CreditCard className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                                    <p className="text-sm font-semibold text-foreground mb-1">No saved payment methods</p>
+                                    <p className="text-xs text-muted-foreground">Your saved cards and UPI IDs will appear here.</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Notifications */}
+                        {activeSection === "notifications" && (
+                            <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                                <div className="px-5 py-3 border-b border-border">
+                                    <h2 className="text-sm font-bold text-foreground">Notification Preferences</h2>
+                                </div>
+                                <div className="divide-y divide-border/50">
+                                    {[
+                                        { title: "Order Updates", desc: "Get notified about order status changes.", on: true },
+                                        { title: "Promotional Emails", desc: "Receive deals, offers, and new launch alerts.", on: false },
+                                        { title: "Price Drop Alerts", desc: "Get notified when wishlist items go on sale.", on: true },
+                                    ].map((pref, i) => (
+                                        <div key={i} className="flex items-center justify-between px-5 py-3.5">
+                                            <div>
+                                                <p className="text-sm font-semibold text-foreground">{pref.title}</p>
+                                                <p className="text-xs text-muted-foreground mt-0.5">{pref.desc}</p>
+                                            </div>
+                                            <div className={`w-10 h-5.5 rounded-full relative cursor-pointer transition-colors ${pref.on ? "bg-primary" : "bg-border"}`}>
+                                                <div className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white shadow transition-transform ${pref.on ? "translate-x-5" : "translate-x-0.5"}`} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Help */}
+                        {activeSection === "help" && (
+                            <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                                <div className="px-5 py-3 border-b border-border">
+                                    <h2 className="text-sm font-bold text-foreground">Help & Support</h2>
+                                </div>
+                                <div className="divide-y divide-border/50">
+                                    {[
+                                        { q: "How do I track my order?", a: "Go to My Orders and click on the order to see live tracking." },
+                                        { q: "What is the return policy?", a: "We accept returns within 7 days of delivery for all products." },
+                                        { q: "How do I contact support?", a: "Email us at support@boat.com or call 1800-200-9898 (Mon-Sat, 9am-6pm)." },
+                                    ].map((item, i) => (
+                                        <div key={i} className="px-5 py-3.5">
+                                            <p className="text-sm font-semibold text-foreground mb-1">{item.q}</p>
+                                            <p className="text-xs text-muted-foreground leading-relaxed">{item.a}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Quick Links (always visible) */}
+                        <div className="bg-white dark:bg-card border border-border rounded-lg overflow-hidden">
+                            <div className="px-5 py-3 border-b border-border">
+                                <h3 className="text-sm font-bold text-foreground">Quick Links</h3>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
+                                {[
+                                    { icon: Package, label: "My Orders", link: "/orders" },
+                                    { icon: Heart, label: "Wishlist", link: "/wishlist" },
+                                    { icon: MapPin, label: "Addresses", action: () => setActiveSection("addresses") },
+                                    { icon: HelpCircle, label: "Help", action: () => setActiveSection("help") },
+                                ].map((q, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => q.link ? navigate(q.link) : q.action?.()}
+                                        className="flex flex-col items-center gap-2 py-4 text-muted-foreground hover:text-primary hover:bg-secondary/20 transition-colors"
+                                    >
+                                        <q.icon className="w-5 h-5" />
+                                        <span className="text-xs font-medium">{q.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
-            </main>
+            </div>
         </div>
     )
 }

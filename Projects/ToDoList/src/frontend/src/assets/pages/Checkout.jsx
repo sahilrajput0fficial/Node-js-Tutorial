@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,9 +36,10 @@ import {
 } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
-import { placeOrder, getCouponStatus } from "../api/order.api";
+import { placeOrder, getCouponStatus, startPayment } from "../api/order.api";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { load as loadCashfree } from "@cashfreepayments/cashfree-js";
 
 const INDIAN_STATES = [
   // States (28)
@@ -133,12 +135,9 @@ const Checkout = () => {
     city: "",
     state: "",
     pincode: "",
-    cardNumber: "",
-    cardName: "",
-    expiry: "",
-    cvv: "",
     upi: ""
   });
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [ModalLink, setModalLink] = useState("/");
   const [ModalLinkText, setModalLinkText] = useState("Continue Shopping");
@@ -224,34 +223,6 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod === "card") {
-      if (
-        !formData.cardNumber ||
-        !formData.cardName ||
-        !formData.expiry ||
-        !formData.cvv
-      ) {
-        setModalStatus("error");
-        setModalTitle("Wait!");
-        setModalMessage(
-          "Please fill all required fields to proceed with your order."
-        );
-        setShowModal(true);
-        return;
-      }
-    }
-    else if (paymentMethod === "upi") {
-      if (!formData.upi) {
-        setModalStatus("error");
-        setModalTitle("Wait!");
-        setModalMessage(
-          "Please fill to proceed with your order."
-        );
-        setShowModal(true);
-        return;
-      }
-    }
-
     setModalStatus("loading");
     setModalTitle("Placing Order...");
     setShowModal(true);
@@ -268,18 +239,49 @@ const Checkout = () => {
 
     try {
       const response = await placeOrder(orderData);
-      console.log(response);
+      const orderId = response?.response?._id;
+      console.log("Order placed:", response);
 
+      // For online payments (card/upi), redirect to Cashfree
+      if (paymentMethod !== "cod") {
+        setModalTitle("Redirecting to Payment...");
+        setIsRedirecting(true);
+
+        try {
+          // Get payment session from backend
+          const paymentResponse = await startPayment(
+            orderId,
+            total,
+            formData.email || "customer@example.com",
+            formData.mobile
+          );
+
+          // Load Cashfree SDK and redirect
+          const cashfree = await loadCashfree({ mode: "sandbox" });
+          await cashfree.checkout({
+            paymentSessionId: paymentResponse.paymentSessionId,
+            redirectTarget: "_self",
+          });
+        } catch (paymentError) {
+          console.error("Payment initiation failed:", paymentError);
+          setIsRedirecting(false);
+          setModalStatus("error");
+          setModalTitle("Payment Failed");
+          setModalMessage(
+            "Could not initiate payment. Your order has been saved. Please try again from your orders page."
+          );
+        }
+        return;
+      }
+
+      // For COD — show success directly
       setModalStatus("success");
       setModalTitle("Order Successful!");
       setModalMessage(
-        `Thank you for your purchase! Your order has been placed successfully. Order ID: ${response?.data?.order?._id || "#" + Math.random().toString(36).substr(2, 9).toUpperCase()
-        }`
+        `Thank you for your purchase! Your order has been placed successfully. Order ID: #${(orderId || "").slice(-8).toUpperCase()}`
       );
       setModalLink("/orders");
       setModalLinkText("View Orders");
-
-
 
       // Clear cart
       setCartItems([]);
@@ -551,97 +553,48 @@ const Checkout = () => {
                 {/* Method detail panel */}
                 <div className="flex-1 p-5">
                   {paymentMethod === "card" && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-semibold text-foreground">
-                          Card Details
-                        </p>
-                        <div className="flex items-center gap-1.5 opacity-70">
-                          {["VISA", "MC", "RUPAY"].map((n) => (
-                            <span
-                              key={n}
-                              className="text-[10px] font-bold border border-border rounded px-1.5 py-0.5 text-muted-foreground"
-                            >
-                              {n}
-                            </span>
-                          ))}
-                        </div>
+                    <div className="flex flex-col items-center justify-center h-full py-8 text-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <CreditCard className="h-6 w-6 text-blue-600" />
                       </div>
-                      <FormField label="Card Number" required>
-                        <Input required
-                          name="cardNumber"
-                          value={formData.cardNumber}
-                          onChange={handleChange}
-                          placeholder="0000  0000  0000  0000"
-                          maxLength={19}
-                          className={inputClass}
-                        />
-                      </FormField>
-                      <FormField label="Name on Card" required>
-                        <Input required
-                          name="cardName"
-                          value={formData.cardName}
-                          onChange={handleChange}
-                          placeholder="RAHUL SHARMA"
-                          className={`${inputClass} uppercase`}
-                        />
-                      </FormField>
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField label="Expiry Date" required>
-                          <Input required
-                            name="expiry"
-                            value={formData.expiry}
-                            onChange={handleChange}
-                            placeholder="MM / YY"
-                            maxLength={7}
-                            className={inputClass}
-                          />
-                        </FormField>
-                        <FormField label="CVV" required>
-                          <Input required
-                            name="cvv"
-                            value={formData.cvv}
-                            onChange={handleChange}
-                            placeholder="• • •"
-                            type="password"
-                            maxLength={3}
-                            className={inputClass}
-                          />
-                        </FormField>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">
+                          Pay with Card
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1 max-w-[260px]">
+                          You'll be securely redirected to Cashfree's payment page to enter your card details.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1.5 opacity-70 mt-2">
+                        {["VISA", "MC", "RUPAY"].map((n) => (
+                          <span
+                            key={n}
+                            className="text-[10px] font-bold border border-border rounded px-1.5 py-0.5 text-muted-foreground"
+                          >
+                            {n}
+                          </span>
+                        ))}
                       </div>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                         <Lock className="h-3 w-3" />
-                        Your card data is never stored on our servers.
+                        256-bit encrypted. Your data is safe.
                       </p>
                     </div>
                   )}
 
                   {paymentMethod === "upi" && (
-                    <div className="space-y-4">
-                      <p className="text-sm font-semibold text-foreground mb-2">
-                        Pay via UPI
-                      </p>
-                      <FormField label="UPI ID (VPA)" required>
-                        <div className="flex">
-                          <Input required
-                            name="upi"
-                            value={formData.upi}
-                            onChange={handleChange}
-                            placeholder="yourname@okicici"
-                            className={`${inputClass} rounded-r-none`}
-                          />
-                          <Button
-                            variant="secondary"
-                            className="rounded-l-none h-10 px-4 border border-l-0 border-border text-sm font-medium"
-                          >
-                            Verify
-                          </Button>
-                        </div>
-                      </FormField>
-                      <p className="text-xs text-muted-foreground">
-                        Enter your UPI ID and click Verify. You'll receive a
-                        payment request on your UPI app.
-                      </p>
+                    <div className="flex flex-col items-center justify-center h-full py-8 text-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <Smartphone className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground text-sm">
+                          Pay via UPI
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1 max-w-[260px]">
+                          You'll be securely redirected to Cashfree's payment page to complete UPI payment.
+                        </p>
+                      </div>
                       <div className="flex flex-wrap gap-3 pt-1">
                         {["GPay", "PhonePe", "Paytm", "BHIM"].map((app) => (
                           <span
@@ -652,6 +605,10 @@ const Checkout = () => {
                           </span>
                         ))}
                       </div>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                        <Lock className="h-3 w-3" />
+                        Secure payment powered by Cashfree
+                      </p>
                     </div>
                   )}
 
@@ -844,7 +801,11 @@ const Checkout = () => {
               {modalStatus === "loading" && (
                 <div className="relative">
                   <div className="w-20 h-20 rounded-full border-4 border-primary/20 animate-pulse" />
-                  <Loader2 className="h-10 w-10 text-primary animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  {isRedirecting ? (
+                    <ExternalLink className="h-10 w-10 text-primary animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  ) : (
+                    <Loader2 className="h-10 w-10 text-primary animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                  )}
                 </div>
               )}
               {modalStatus === "success" && (

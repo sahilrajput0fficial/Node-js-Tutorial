@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Package, ShoppingBag, Truck, CheckCircle2, AlertCircle, Clock, ChevronRight } from "lucide-react";
+import { Package, ShoppingBag, Truck, CheckCircle2, AlertCircle, Clock, ChevronRight, CreditCard, Smartphone, BadgeIndianRupee, Box } from "lucide-react";
 import { getOrders } from "../api/order.api";
 import { useAuth } from "@/context/AuthContext";
-const Badge = ({ children, className, variant = "default", ...props }) => (
+
+const Badge = ({ children, className, ...props }) => (
     <span
-        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className || ''}`}
+        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors ${className || ''}`}
         {...props}
     >
         {children}
@@ -24,15 +25,35 @@ const getStatusBadge = (status) => {
         case 'delivered':
             return <Badge className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 flex gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Delivered</Badge>;
         case 'shipped':
-        case 'dispatched':
             return <Badge className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 flex gap-1.5"><Truck className="w-3.5 h-3.5" /> Shipped</Badge>;
+        case 'dispatched':
+            return <Badge className="bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 flex gap-1.5"><Box className="w-3.5 h-3.5" /> Dispatched</Badge>;
         case 'processing':
-        case 'pending':
             return <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 flex gap-1.5"><Clock className="w-3.5 h-3.5" /> Processing</Badge>;
+        case 'pending':
+            return <Badge className="bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 flex gap-1.5"><Clock className="w-3.5 h-3.5" /> Pending</Badge>;
         case 'cancelled':
             return <Badge className="bg-red-50 text-red-700 border-red-200 hover:bg-red-100 flex gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Cancelled</Badge>;
         default:
-            return <Badge variant="outline" className="flex gap-1.5"><Package className="w-3.5 h-3.5" /> {status || 'Placed'}</Badge>;
+            return <Badge className="bg-gray-50 text-gray-700 border-gray-200 flex gap-1.5"><Package className="w-3.5 h-3.5" /> {status || 'Placed'}</Badge>;
+    }
+};
+
+const getPaymentIcon = (method) => {
+    switch (method) {
+        case 'card': return <CreditCard className="w-3.5 h-3.5" />;
+        case 'upi': return <Smartphone className="w-3.5 h-3.5" />;
+        case 'cod': return <BadgeIndianRupee className="w-3.5 h-3.5" />;
+        default: return null;
+    }
+};
+
+const getPaymentLabel = (method) => {
+    switch (method) {
+        case 'card': return 'Card';
+        case 'upi': return 'UPI';
+        case 'cod': return 'COD';
+        default: return method || '';
     }
 };
 
@@ -46,32 +67,28 @@ export default function Orders() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { user } = useAuth(); // Assume we need auth
+    const { user } = useAuth();
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 setLoading(true);
-                // Note: Currently backend is not saving orders to DB, so this might return 404
-                // or empty array depending on backend state. We'll handle it gracefully.
                 const response = await getOrders();
 
-                // Handle response structure depending on actual API response
-                if (response?.data) {
+                if (response?.orders) {
+                    setOrders(response.orders);
+                } else if (response?.data?.orders) {
+                    setOrders(response.data.orders);
+                } else if (Array.isArray(response?.data)) {
                     setOrders(response.data);
                 } else if (Array.isArray(response)) {
                     setOrders(response);
-                } else if (response?.success && response?.orders) {
-                    setOrders(response.orders);
                 } else {
                     setOrders([]);
                 }
-
             } catch (err) {
                 console.error("Error fetching orders:", err);
-                // Graceful fallback for demonstration since backend might not be ready
                 if (err?.response?.status === 404 || err?.message?.includes('Network')) {
-                    // Silently fail if endpoint doesn't exist yet to show beautiful empty state
                     setOrders([]);
                 } else {
                     setError("We couldn't load your orders right now. Please try again later.");
@@ -91,7 +108,7 @@ export default function Orders() {
                     <Skeleton className="h-8 w-8 rounded-full" />
                     <Skeleton className="h-8 w-48" />
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="border border-border bg-card rounded-xl p-5 shadow-sm">
                             <div className="flex justify-between items-center mb-4">
@@ -100,7 +117,7 @@ export default function Orders() {
                             </div>
                             <Skeleton className="h-px w-full my-4" />
                             <div className="flex gap-4">
-                                <Skeleton className="h-24 w-24 rounded-md" />
+                                <Skeleton className="h-20 w-20 rounded-md" />
                                 <div className="flex-1 space-y-3 py-2">
                                     <Skeleton className="h-4 w-3/4" />
                                     <Skeleton className="h-4 w-1/4" />
@@ -113,7 +130,6 @@ export default function Orders() {
         );
     }
 
-    // Beautiful empty State if there are no orders
     if (orders.length === 0 && !error) {
         return (
             <div className="min-h-[80vh] flex flex-col justify-center items-center px-4 py-12 text-center bg-zinc-50/50 dark:bg-background/50">
@@ -166,84 +182,92 @@ export default function Orders() {
                         </button>
                     </div>
                 ) : (
-                    <div className="space-y-6">
-                        {orders.map((order) => (
-                            <div
-                                key={order._id || order.id || Math.random()}
-                                className="bg-card border border-border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
-                            >
-                                {/* Order Header */}
-                                <div className="bg-secondary/30 px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border">
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-2 text-sm">
-                                        <div>
-                                            <p className="text-muted-foreground text-xs uppercase font-semibold">Order Placed</p>
-                                            <p className="font-medium mt-1">{formatDate(order.createdAt || order.date)}</p>
+                    <div className="space-y-4">
+                        {orders.map((order) => {
+                            const orderId = order._id || order.id;
+                            const items = order.cartItems || order.items || [];
+                            return (
+                                <Link
+                                    key={orderId || Math.random()}
+                                    to={`/orders/${orderId}`}
+                                    className="block bg-card border border-border rounded-xl shadow-sm overflow-hidden hover:shadow-md hover:border-primary/30 transition-all duration-300 group"
+                                >
+                                    {/* Order Header */}
+                                    <div className="bg-secondary/30 px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border">
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-2 text-sm flex-1">
+                                            <div>
+                                                <p className="text-muted-foreground text-xs uppercase font-semibold">Order Placed</p>
+                                                <p className="font-medium mt-0.5">{formatDate(order.createdAt || order.date)}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-muted-foreground text-xs uppercase font-semibold">Total</p>
+                                                <p className="font-bold mt-0.5 text-primary">₹{(order.total || order.totalAmount || 0).toLocaleString('en-IN')}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-muted-foreground text-xs uppercase font-semibold">Payment</p>
+                                                <p className="font-medium mt-0.5 flex items-center gap-1.5 capitalize">
+                                                    {getPaymentIcon(order.paymentMethod)}
+                                                    {getPaymentLabel(order.paymentMethod)}
+                                                </p>
+                                            </div>
+                                            <div className="col-span-2 sm:col-span-1">
+                                                <p className="text-muted-foreground text-xs uppercase font-semibold">Order ID</p>
+                                                <p className="font-mono mt-0.5 text-xs/5 break-all">#{(orderId || '').slice(-8).toUpperCase()}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-muted-foreground text-xs uppercase font-semibold">Total Amount</p>
-                                            <p className="font-bold mt-1 text-primary">₹{(order.total || order.totalAmount || 0).toLocaleString('en-IN')}</p>
-                                        </div>
-                                        <div className="col-span-2 sm:col-span-1">
-                                            <p className="text-muted-foreground text-xs uppercase font-semibold">Order ID</p>
-                                            <p className="font-mono mt-1 text-xs/5 break-all">#{order._id || order.id || order.orderId || Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
-                                        </div>
+                                        <div className="shrink-0">{getStatusBadge(order.paymentStatus)}</div>
                                     </div>
-                                </div>
 
-                                {/* Order Items */}
-                                <div className="divide-y divide-border/50">
-                                    {/* Handle if backend sends items or cartItems */}
-                                    {(order.items || order.cartItems || []).map((item, index) => (
-                                        <div key={index} className="p-5 flex flex-col sm:flex-row gap-5 items-start">
-                                            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary/20">
-                                                <img
-                                                    src={item.image || item.images?.[0] || "https://placehold.co/100x100?text=Product"}
-                                                    alt={item.name || "Product Image"}
-                                                    className="h-full w-full object-cover object-center"
-                                                />
-                                            </div>
-
-                                            <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:justify-between w-full">
-                                                <div className="space-y-1 sm:pr-4">
-                                                    <h3 className="font-semibold text-base text-foreground line-clamp-2">
-                                                        {item.name || "Awesome Product"}
+                                    {/* Order Items Preview */}
+                                    <div className="divide-y divide-border/50">
+                                        {items.slice(0, 2).map((item, index) => (
+                                            <div key={index} className="p-4 flex gap-4 items-center">
+                                                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary/20">
+                                                    <img
+                                                        src={item.image || item.images?.[0] || "https://placehold.co/100x100?text=Product"}
+                                                        alt={item.name || "Product Image"}
+                                                        className="h-full w-full object-cover object-center"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+                                                        {item.name || "Product"}
                                                     </h3>
-                                                    <p className="text-sm text-primary font-medium">₹{(item.price || 0).toLocaleString('en-IN')}</p>
-                                                    <p className="text-sm text-muted-foreground">Qty: {item.quantity || item.qty || 1}</p>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        Qty: {item.quantity || item.qty || 1} · ₹{(item.price || 0).toLocaleString('en-IN')}
+                                                    </p>
                                                 </div>
-
-                                                <div className="mt-4 sm:mt-0 flex flex-col sm:items-end gap-3">
-                                                    {getStatusBadge(order.status)}
-                                                    <Link
-                                                        to={`/products/${item.slug || item.id}`}
-                                                        className="text-sm font-medium text-primary hover:text-primary/80 hover:underline flex items-center gap-1 mt-auto"
-                                                    >
-                                                        Buy it again <ChevronRight className="w-3.5 h-3.5" />
-                                                    </Link>
+                                                <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                                            </div>
+                                        ))}
+                                        {items.length > 2 && (
+                                            <div className="px-4 py-2.5 text-xs text-muted-foreground text-center bg-secondary/10">
+                                                + {items.length - 2} more item{items.length - 2 > 1 ? 's' : ''}
+                                            </div>
+                                        )}
+                                        {items.length === 0 && (
+                                            <div className="p-4 flex gap-4 items-center">
+                                                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary/20 flex flex-col items-center justify-center text-muted-foreground">
+                                                    <Package className="h-6 w-6 opacity-50" />
                                                 </div>
+                                                <div>
+                                                    <h3 className="font-semibold text-sm text-foreground">Your Ordered Item(s)</h3>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">Tap to view order details</p>
+                                                </div>
+                                                <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto" />
                                             </div>
-                                        </div>
-                                    ))}
+                                        )}
+                                    </div>
 
-                                    {/* Fallback if no items array (e.g., mock visual testing) */}
-                                    {!(order.items || order.cartItems)?.length && (
-                                        <div className="p-5 flex flex-col sm:flex-row gap-5 items-start">
-                                            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-secondary/20 flex flex-col items-center justify-center text-muted-foreground">
-                                                <Package className="h-8 w-8 mb-1 opacity-50" />
-                                                <span className="text-[10px] font-medium">No Image</span>
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-foreground mb-1">
-                                                    Your Ordered Item(s)
-                                                </h3>
-                                                <p className="text-sm text-muted-foreground mb-3">Details will appear here once successfully parsed from the server.</p>
-                                                {getStatusBadge(order.status)}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                    {/* View Details Footer */}
+                                    <div className="px-5 py-2.5 border-t border-border bg-secondary/10 flex items-center justify-end">
+                                        <span className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                                            View Order Details <ChevronRight className="w-3.5 h-3.5" />
+                                        </span>
+                                    </div>
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </div>

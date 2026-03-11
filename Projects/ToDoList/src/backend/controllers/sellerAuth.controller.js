@@ -1,4 +1,3 @@
-import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { SellerModel } from "../models/seller.models.js";
@@ -14,22 +13,31 @@ export const signupSellerController = async (req, res) => {
     const data = req.body;
     //console.log(data.password);
     const hashed = await bcrypt.hash(data.password, 10);
-    const ifexists = await SellerModel.findOne({ email: data.email });
-    if (ifexists) {
+    const ifexistsByEmail = await SellerModel.findOne({ email: data.email.toLowerCase() });
+    if (ifexistsByEmail) {
       return res.status(400).json({
         success: false,
-        message: "User already exists",
+        message: "Email already in use",
         type: "error",
       });
     }
-    const nameArray = data.name.split(" ");
+
+    const ifexistsByStore = await SellerModel.findOne({ storeName: data.storeName });
+    if (ifexistsByStore) {
+      return res.status(400).json({
+        success: false,
+        message: "Store Name already in use",
+        type: "error",
+      });
+    }
+
+    const nameArray = data.name.trim().split(" ");
     const user = {
       fName: nameArray[0],
-      lName: nameArray[1] || " ",
-      storeName : data.storeName,
-      email: data.email,
+      lName: nameArray.slice(1).join(" ") || "",
+      storeName: data.storeName,
+      email: data.email.toLowerCase(),
       password: hashed,
-      "created At": new Date(),
     };
     const inserted = await SellerModel.create(user);
     
@@ -71,6 +79,56 @@ export const signupSellerController = async (req, res) => {
     });
   }
 };
+
+export const loginSellerController = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
+    const seller = await SellerModel.findOne({ email: email.toLowerCase() });
+    if (!seller) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, seller.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+
+    const payload = {
+      sellerId: seller._id,
+      email: seller.email,
+      role: seller.role,
+    };
+
+    const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_KEY, { expiresIn: "1h" });
+    const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_KEY, { expiresIn: "7d" });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+      maxAge: 15 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      message: "Login Successful",
+      success: true,
+      token: accessToken,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Internal Server Error", error: err.message });
+  }
+};
+
 export const refreshSellerTokenController = (req, res) => {
     if(!req.cookies.refreshToken){
         return res.status(401).json({

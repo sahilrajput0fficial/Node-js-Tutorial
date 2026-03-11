@@ -51,13 +51,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const token = await refreshAccessToken();
         if (!token) throw new Error();
 
-        const profile = await profileAPI(token);
+        const profileRes = await profileAPI(token);
+        const profile = profileRes.user;
 
         const userData: User = {
           id: profile._id,
           email: profile.email,
-          name: `${profile.fName} ${profile.lName}`,
-          storeName: profile.store,
+          name: `${profile.fName} ${(profile.lName || '').trim()}`.trim(),
+          storeName: profile.storeName || '',
         };
 
         setUser(userData);
@@ -100,13 +101,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setAccessToken(res.token);
 
-      const profile = await profileAPI(res.token);
+      const profileRes = await profileAPI(res.token);
+      const profile = profileRes.user;
 
       const userData: User = {
         id: profile._id,
         email: profile.email,
-        name: `${profile.fName} ${profile.lName}`,
-        storeName: profile.store,
+        name: `${profile.fName} ${(profile.lName || '').trim()}`.trim(),
+        storeName: profile.storeName || '',
       };
 
       setUser(userData);
@@ -145,8 +147,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       localStorage.setItem("seller_user", JSON.stringify(userData));
 
       return { success: true };
-    } catch {
-      return { success: false, error: "Signup failed" };
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Signup failed";
+      return { success: false, error: message };
     }
   };
 

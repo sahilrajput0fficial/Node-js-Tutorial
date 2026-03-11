@@ -1,8 +1,10 @@
 import React from 'react'
-const Logo = ({className}) => {
+import { useNavigate } from 'react-router-dom'
+const Logo = ({ className }) => {
+  const navigate = useNavigate()
   return (
     <>
-    <img  className={className} src="/download.svg" alt="" />
+      <img onClick={() => navigate("/")} className={className} src="/download.svg" alt="" />
 
     </>
   )

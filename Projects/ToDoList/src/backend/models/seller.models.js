@@ -14,9 +14,9 @@ const sellerSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
-    storeName : {
+    storeName: {
       type: String,
-      unique :true
+      unique: true,
     },
 
     slug: {
@@ -28,7 +28,6 @@ const sellerSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      unique: true,
     },
 
     email: {
@@ -41,9 +40,9 @@ const sellerSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
-    role : {
-      type : String,
-      default : 'seller'
+    role: {
+      type: String,
+      default: "seller",
     },
 
     logo: String,
@@ -124,7 +123,7 @@ sellerSchema.pre("validate", async function () {
   if (!this.slug) {
     this.slug = slugify(name, {
       lower: true,
-      strict: true
+      strict: true,
     });
   }
 });

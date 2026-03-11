@@ -90,7 +90,7 @@ export async function googleOAuthCallback(req, res) {
        secure: false,
        maxAge: 7*24*60*60*1000,
      });
-     res.cookie("AuthToken",accessToken,{
+     res.cookie("accessToken",accessToken,{
         httpOnly:true,
         sameSite : "lax",
         secure :false,

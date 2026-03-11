@@ -1,20 +1,14 @@
 import { userModel } from "../models/auth.models.js";
 import jwt from "jsonwebtoken";
-import {
-  register,
-  loginUser,
-  getProfile,
-  getStaff,
-  refreshTokenService,
-} from "../services/auth.services.js";
+import { register, loginUser, getProfile, getStaff, refreshTokenService } from "../services/auth.services.js";
 export const signupController = async (req, res) => {
   if (!req.body) {
     return res.json({
-      message: "Data Missing",
-    });
+      message: "Data Missing"
+    })
   }
   try {
-    const user = await register(req.body);
+    const user = await register(req.body)
     res.status(201).json({
       message: "User registered successfully",
       type: "success",
@@ -25,13 +19,13 @@ export const signupController = async (req, res) => {
       .status(500)
       .json({ message: "Internal Server Error", error: err.message });
   }
-};
+}
 export const loginController = async (req, res, next) => {
   try {
     if (!req.body) {
       res.status(400).json({
-        message: "Details Missing",
-      });
+        message: "Details Missing"
+      })
       return;
     }
     const { email, password } = req.body;
@@ -42,10 +36,7 @@ export const loginController = async (req, res, next) => {
       });
       return;
     }
-    const { accessToken, refreshToken, user } = await loginUser(
-      email,
-      password,
-    );
+    const { accessToken, refreshToken, user } = await loginUser(email, password);
     if (!user) {
       res.status(400).json({
         message: "Invalid Credentials",
@@ -64,22 +55,23 @@ export const loginController = async (req, res, next) => {
       message: "Login Successful",
       token: accessToken,
     });
+
   } catch (err) {
     next(err);
   }
-};
+}
 export const getProfileController = async (req, res, next) => {
   try {
     const userId = req.user.userId;
     const user = await getProfile(userId);
     res.status(200).json({
       message: "User Profile fetched successfully",
-      user: user,
-    });
+      user: user
+    })
   } catch (err) {
     next(err);
   }
-};
+}
 
 export const getStaffController = async (req, res, next) => {
   try {
@@ -92,7 +84,7 @@ export const getStaffController = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
+}
 
 export const refreshTokenController = async (req, res) => {
   if (!req.cookies.refreshToken) {
@@ -108,14 +100,21 @@ export const refreshTokenController = async (req, res) => {
       sameSite: "lax",
       secure: process.env.NODE_ENV == "production",
       maxAge: 10 * 60 * 60 * 1000,
-    });
+    })
     res.status(200).json({
       message: "Access Token refreshed successfully",
       token: accessToken,
     });
-  } catch (err) {
+
+  }
+  catch (err) {
     return res.status(400).json({
       message: "Invalid Refresh Token",
-    });
+    })
   }
-};
+}
+
+
+
+
+
